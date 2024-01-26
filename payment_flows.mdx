@@ -17,7 +17,7 @@ platform qualifies for the simplest [SAQ-A PCI Compliance Form][pci-dss saq]
 level. In addition to cards, this flow also supports many digital wallet payment
 instruments such as Apple Pay, Google Pay, and PayPal.
 
-![Tokenized Payment Flow Diagram](assets/tokenized-payment-flow.svg)
+<img height="200" src="/images/tokenized-payment-flow.svg" />
 
 1. Your server sends a [Client API Key][authorization] to your client (1).
 2. BR-DGE [PCI-DSS SAQ-D][pci-dss saq] compliant [Web SDK] and systems collect
@@ -70,7 +70,7 @@ for more details on the `ProviderThreeDSecureNonce` Payment Instrument.
 
 ### Redirect Payment Flow
 
-![Redirect Payment Flow Diagram](assets/redirect-payment-flow.svg)
+<img height="200" src="/images/redirect-payment-flow.svg" />
 
 Some [Payment Instruments] use a Redirect Payment Flow and require the customer
 to be redirected to an external provider.
@@ -103,7 +103,7 @@ Your server creates a payment containing cardholder data via the [BR-DGE REST
 API] (2), which routes the request to an appropriate [Payment Service Provider
 (PSP)][psp].
 
-![Card Payment Flow Diagram](assets/card-payment-flow.svg)
+<img height="200" src="/images/card-payment-flow.svg" />
 
 <Alert>
 
