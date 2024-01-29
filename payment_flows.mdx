@@ -8,33 +8,33 @@ payment flows involve the use of your **Server API Key** to ensure there are no
 unauthorized payments.
 
 Alternatively, you can fully outsource your payment page to BR-DGE using our
-customizable [Hosted Payment Page](BHPP), which has its own flow.
+customizable Hosted Payment Page, which has its own flow.
 
 ### Tokenized Payment Flow
 
 Fully outsource all your cardholder data functions to BR-DGE so that your
-platform qualifies for the simplest [SAQ-A PCI Compliance Form][pci-dss saq]
+platform qualifies for the simplest SAQ-A PCI Compliance Form
 level. In addition to cards, this flow also supports many digital wallet payment
 instruments such as Apple Pay, Google Pay, and PayPal.
 
-![Tokenized Payment Flow Diagram](assets/tokenized-payment-flow.svg)
+<img height="200" src="/images/tokenized-payment-flow.svg" />
 
-1. Your server sends a [Client API Key][authorization] to your client (1).
-2. BR-DGE [PCI-DSS SAQ-D][pci-dss saq] compliant [Web SDK] and systems collect
-   payment data and generate tokens that can be safely handled by your [PCI-DSS
-   SAQ-A][pci-dss saq] platform.
+1. Your server sends a Client API Key to your client (1).
+2. BR-DGE PCI-DSS SAQ-D compliant Web SDK and systems collect
+   payment data and generate tokens that can be safely handled by your PCI-DSS
+   SAQ-A platform.
 3. Your client sends the payment token to your server, along with checkout
    information (3).
-4. Your server creates payments using tokenized [Payment Instruments] (4), which
-   routes the request to an appropriate [PSP][psp].
+4. Your server creates payments using tokenized Payment Instruments (4), which
+   routes the request to an appropriate PSP.
 
 #### Tokenized Payment Flow with MOTO
 
 Mail Order / Telephone Order (MOTO) payments require merchant agents (e.g. call
 centre staff) to handle cardholder data, meaning it is not possible to achieve
-[PCI-DSS SAQ-A][pci-dss saq]. However, it is still possible to increase security
+PCI-DSS SAQ-A. However, it is still possible to increase security
 while decreasing compliance costs by tokenizing cardholder data on your agents'
-client applications with BR-DGE via our [Web SDK] or
+client applications with BR-DGE via our Web SDK or
 [Payment Instrument Tokenization Endpoints](/api-reference#/Payment%20Instrument%20Tokenization).
 The rest of your systems can then only deal with less sensitive tokens.
 
@@ -47,21 +47,21 @@ transactions.
 
 ### 3-D Secure Payment Flow
 
-![3-D Secure Payment Flow Diagram](assets/3-D-secure-payment-flow.svg)
+<img height="200" src="/images/3-D-secure-payment-flow.svg" />
 
 If [3-D Secure] is applied to a payment then some actions may need to be
 performed on your client. These actions differ between individual [PSP]s, but
 this flow works with [Web SDK] to abstract away differences so that you only
 need to deal with one flow.
 
-1. Your server receives a [3-D Secure additional action required] in response to
+1. Your server receives a **3-D Secure additional action required** in response to
    a payment request.
 2. Your server passes the action payload to your client.
 3. The BR-DGE [Web SDK] provides functionality to handle the action, producing a
    nonce that you pass back to your server.
 4. The nonce can be used to complete the payment using a
-   `ProviderThreeDSecureNonce` [Payment Instrument][payment instruments].
-   - You may receive additional [3-D Secure additional action required]
+   `ProviderThreeDSecureNonce` Payment Instrument.
+   - You may receive additional 3-D Secure additional action required
      responses depending on the underlying PSP, in which case return to step 1.
 
 Please refer to the
@@ -70,20 +70,20 @@ for more details on the `ProviderThreeDSecureNonce` Payment Instrument.
 
 ### Redirect Payment Flow
 
-![Redirect Payment Flow Diagram](assets/redirect-payment-flow.svg)
+<img height="200" src="/images/redirect-payment-flow.svg" />
 
-Some [Payment Instruments] use a Redirect Payment Flow and require the customer
+Some Payment Instruments use a Redirect Payment Flow and require the customer
 to be redirected to an external provider.
 
-1. Your server sends a [Client API Key][authorization] to your client
-2. The [BR-DGE Web SDK][web sdk] will intelligently offer appropriate payment
+1. Your server sends a Client API Key to your client
+2. The BR-DGE Web SDK will intelligently offer appropriate payment
    options to your customers
 3. If your customer selects a redirect flow payment option then your client app
    informs your server along with checkout information
 4. Your server makes a payment request, and a URL redirect action is returned
-5. You pass the URL redirect action to the [BR-DGE Web SDK][web sdk] running on
+5. You pass the URL redirect action to the BR-DGE Web SDK running on
    your client app
-6. The [BR-DGE Web SDK][web sdk] will redirect your customer to the URL of the
+6. The BR-DGE Web SDK will redirect your customer to the URL of the
    external provider
 7. Once your customer has finished interacting with the external provider then
    they will be directed back to your client app
@@ -92,7 +92,7 @@ to be redirected to an external provider.
 
 <Note>
 
-Some [Payment Service Providers][payment service provider] may have a delay when
+Some Payment Service Providers may have a delay when
 updating the payment status
 
 </Note>
@@ -100,10 +100,9 @@ updating the payment status
 ### Card Payment Flow
 
 Your server creates a payment containing cardholder data via the [BR-DGE REST
-API] (2), which routes the request to an appropriate [Payment Service Provider
-(PSP)][psp].
+API] (2), which routes the request to an appropriate <Tooltip tip="A Payment Service Provider (PSP) offers merchants online services for accepting electronic payments by a variety of payment methods (payment instruments).">Payment Service Provider</Tooltip>.
 
-![Card Payment Flow Diagram](assets/card-payment-flow.svg)
+<img height="200" src="/images/card-payment-flow.svg" />
 
 <Alert>
 
