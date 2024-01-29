@@ -1,0 +1,4021 @@
+openapi: 3.0.1
+info:
+  title: BR-DGE REST API
+  description: >
+    The BR-DGE REST API is designed to provide you with a single integration
+    into the BR-DGE payment marketplace which unlocks access to a wide
+    variety of third party payment services such as Payment Service Providers
+    (PSPs), Digital Wallets, Alternative Payment Methods (APMs), and other
+    services.
+
+
+    Please see our [Web SDK documentation] for more information about how we can
+    help you integrate you client applications with us.
+
+    ## Authorization
+
+    API keys can be generated via the BR-DGE portal and are grouped into two main
+    classes, based on how they will be used:
+
+    - Server API Keys for use by your in your secure back-end services, *and must
+    not be exposed to your end users.*
+
+    - Separate Client API Keys will be provided for use in client applications to
+    support certain features that need to happen in untrusted client environments.
+
+
+    ## Environment Sub Domains
+
+    The BR-DGE REST API is hosted on two subdomains, <https://sandbox.comcarde.com>
+    for testing and <https://secure.comcarde.com> for live payments.
+
+
+    **IMPORTANT** In order to ensure [PCI
+    Compliance](https://www.pcisecuritystandards.org/) please only use mock
+    payment instrument data when interacting with our Sandbox API.
+
+
+    [Web SDK documentation]: https://secure.comcarde.com/docs/web-sdk/web-sdk
+  version: v1
+  contact:
+    name: Customer Support
+    url: https://comcarde.atlassian.net/servicedesk/customer/portal/3
+    email: support@br-dge.to
+servers:
+  - url: https://sandbox.comcarde.com
+    description:
+      Sandbox subdomain for testing your integration works as expected, using
+      mock payment instruments only
+  - url: https://secure.comcarde.com
+    description: Use this subdomain for processing live payments.
+tags:
+  - name: Payments
+    description: Collect money from your customers
+  - name: Payouts
+    description: Send money to your customers
+  - name: Orders
+    description: Create and manage orders for the BR-DGE Hosted Payment Page
+  - name: Payment Instrument Tokenization
+    description: Convert payment instruments (cards, Card on File) into tokens
+  - name: Merchant Server
+    description: Operations intended for use by Merchant servers
+  - name: Merchant Client Application
+    description: Operations intended for use by Merchant client applications
+externalDocs:
+  description: Find more info here
+  url: https://secure.comcarde.com/docs
+paths:
+  /v1/payments:
+    post:
+      tags:
+        - Payments
+        - Merchant Server
+      summary:
+        Request a transfer of funds between accounts at banks or other financial
+        institutions.
+      description: >
+        Our systems will route this request to a Payment Service Provider, as
+        configured by you.
+      operationId: createPaymentUsingPOST
+      security:
+        - 'ServerApiKey': []
+      requestBody:
+        description: Details of the payment to be initiated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+            examples:
+              tokenized-payment:
+                summary: Payment with Tokenized Payment Instrument.
+                description:
+                  Tokenized payment instruments can be used in place of
+                  sensitive cardholder data.
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: tokenized
+                    token: 5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  channel: web
+                  origin: https://example.com/checkout
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureOptions:
+                    challengeRequested: false
+                    exemptionRequested: false
+                  threeDSecureRequired: true
+              card-payment:
+                summary: Payment with Card Payment Instrument
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: card
+                    nameOnCard: John F Doe
+                    pan: 4444 3333 2222 1111
+                    expiryDate: 01-99
+                    startDate: 01-00
+                    issueNumber: 1
+                    cv2: '000'
+                  channel: ios
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureOptions:
+                    challengeRequested: false
+                    exemptionRequested: false
+                  threeDSecureRequired: true
+              card-payment-create-card-on-file:
+                summary:
+                  Payment with Card Payment Instrument and create Card on File
+                description:
+                  Please note that although 3-D secure is not requested in this
+                  example, some PSPs will automatically apply 3-D Secure to the
+                  first payment made with new Card on File.
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: card
+                    nameOnCard: John F Doe
+                    pan: 4444 3333 2222 1111
+                    expiryDate: 01-99
+                    startDate: 01-00
+                    issueNumber: 1
+                    cv2: '000'
+                    tokenize: true
+                  channel: ios
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureRequired: true
+              paypal-payment:
+                summary: Payment with PayPal Payment Instrument
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: payPal
+                    nonce: XX#5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  channel: android
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureOptions:
+                    challengeRequested: false
+                    exemptionRequested: false
+                  threeDSecureRequired: true
+              googlepay-payment:
+                summary: Payment with GooglePay Payment Instrument
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: googlePay
+                    nonce: XX#5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  channel: web
+                  origin: https://example.com/checkout
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureOptions:
+                    challengeRequested: false
+                    exemptionRequested: false
+                  threeDSecureRequired: true
+              applepay-payment:
+                summary: Payment with ApplePay Payment Instrument.
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: applePay
+                    nonce: XX#5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  channel: ios
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureOptions:
+                    challengeRequested: false
+                    exemptionRequested: false
+                  threeDSecureRequired: true
+              providerThreeDSecureNonce-payment:
+                summary:
+                  Payment with ProviderThreeDSecureNonce Payment Instrument.
+                description: >
+                  Part of the [3-D Secure Payment Flow]. In the event that you get a 3D
+                  Secure additional action required response to a payment
+                  request, you can use our [Web SDK Post Response Module]
+                  to handle the action and convert it into a nonce you can use
+                  to complete the payment with a ProviderThreeDSecureNonce
+                  Payment Instrument.
+
+
+                  [3-D Secure Payment Flow]: https://secure.comcarde.com/docs/#3d-secure-payment-flow
+
+                  [Web SDK Post Response Module]: https://secure.comcarde.com/docs/web-sdk/pluggable-modules/web-sdk-post-response-module
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: providerThreeDSecureNonce
+                    paymentId: 45951071-980e-45db-b3d4-5377655de82e
+                    nonce: XX#5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  channel: web
+                  origin: https://example.com/checkout
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureOptions:
+                    challengeRequested: false
+                    exemptionRequested: false
+                  threeDSecureRequired: true
+              split-auth-and-capture:
+                summary: Split Auth and Capture
+                description: >
+                  By default payments are captured immediately, but by setting `intent` to
+                  `authorize` you can control when the payment is captured or voided using
+                  the `/v1/payments/{paymentId}/capture` and `v1/payments/{paymentId}/void`
+                  endpoints.
+                value:
+                  intent: authorize
+                  amount: 1000
+                  paymentInstrument:
+                    type: tokenized
+                    token: 5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  channel: web
+                  origin: https://example.com/checkout
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  browserData:
+                    acceptHeader: application/json
+                    colorDepth: '32'
+                    javaEnabled: true
+                    language: EN_en
+                    screenHeight: 768
+                    screenWidth: 1024
+                    timeZone: 0
+                    userAgent: Mozilla/5.0 (Windows NT 6.1; Win64; x64)
+                      AppleWebKit/537.36 (KHTML, like Gecko)
+                      Chrome/67.0.3396.99 Safari/537.36
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+                  threeDSecureOptions:
+                    challengeRequested: false
+                    exemptionRequested: false
+                  threeDSecureRequired: true
+              ideal-payment:
+                summary: Payment with iDEAL Payment Instrument.
+                description: >
+                  Note that the success and error URLs should not be easily guessable.
+
+
+                  By using unpredictable single-use URLs you can protect
+                  yourself from the possibility of bad actors attempting to
+                  make it appear that payments had a different outcome to reality.
+                  We also recommend that you confirm the outcome of payments via
+                  server-to-server calls to BR-DGE.
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: ideal
+                    successUrl: https://myurl.com/success/f219ea52-d91f-4059-a560-8dd7cbd31fd0
+                    errorUrl: https://myurl.com/error/a73fba88-7874-4d2f-b946-27cfade80be0
+                  channel: ios
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Edisonbaan
+                    address2: 15 Apple Street
+                    town: Amsterdan
+                    county: Nieuwegein
+                    postcode: 3439 MN
+                    country: NL
+                  currencyCode: EUR
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+              bancontact-payment:
+                summary: Payment with Bancontact Payment Instrument.
+                description: >
+                  Note that the success and error URLs should not be easily guessable.
+
+
+                  By using unpredictable single-use URLs you can protect
+                  yourself from the possibility of bad actors attempting to
+                  make it appear that payments had a different outcome to reality.
+                  We also recommend that you confirm the outcome of payments via
+                  server-to-server calls to BR-DGE.
+                value:
+                  amount: 1000
+                  paymentInstrument:
+                    type: bancontact
+                    successUrl: https://myurl.com/success/f219ea52-d91f-4059-a560-8dd7cbd31fd0
+                    errorUrl: https://myurl.com/error/a73fba88-7874-4d2f-b946-27cfade80be0
+                  channel: ios
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Chaussee de Wavre 1520
+                    town: Auderghem
+                    county: Brussels
+                    postcode: '1160'
+                    country: BE
+                  currencyCode: EUR
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  deliveryAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  orderDescription: Taxi fare
+              tokenized-payment-initial-mit:
+                summary: Initial payment with Tokenized Card Payment Instrument
+                  for MIT agreement.
+                description: The first payment for an MIT agreement must occur
+                  with the cardholder present, be flagged as MIT and have 3-D
+                  Secure authentication enabled. Please see
+                  [Making Merchant-Initiated-Transactions (MITs) using Card-on-File](https://secure.comcarde.com/docs/vault#step-2-perform-an-initial-payment)
+                  for more information.
+                value:
+                  merchantInitiated: unscheduled
+                  merchantInitiatedDetails:
+                    initialPayment: true
+                  paymentInstrument:
+                    type: tokenized
+                    token: 5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  threeDSecureRequired: true
+                  amount: 1000
+                  channel: web
+                  origin: https://example.com/checkout
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerIpAddress: 123.100.100.200
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  orderDescription: Taxi fare
+              tokenized-payment-subsequent-mit:
+                summary: Subsequent payment with Tokenized Card Payment
+                  Instrument for MIT agreement.
+                description: After entering into an MIT agreement with a
+                  cardholder, and making an intial payment with the
+                  cardholder present, subsequent MITs should be made in
+                  accordance with your agreement with the cardholder. These
+                  transactions should be linked back to the payment ID, and use
+                  the same Card-on-File, as the initial payment. Please see
+                  [Making Merchant-Initiated-Transactions (MITs) using Card-on-File](https://secure.comcarde.com/docs/vault#step-2-perform-an-initial-payment)
+                  for more information.
+                value:
+                  merchantInitiated: recurring
+                  merchantInitiatedDetails:
+                    previousPaymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                  paymentInstrument:
+                    type: tokenized
+                    token: 5caa5a2a-be0b-4160-ae21-1bbbf2267f4c
+                  amount: 1000
+                  billingAddress:
+                    firstName: John
+                    lastName: Smith
+                    buildingNumberOrName: Flat 1
+                    address1: Victoria House
+                    address2: 15 Apple Street
+                    town: Edinburgh
+                    county: Lothian
+                    postcode: BH23 6AA
+                    country: GB
+                    phoneNumber: "+44 123 1110000"
+                  currencyCode: GBP
+                  customerEmail: a@b.com
+                  customerFirstName: John
+                  customerLastName: Smith
+                  customerOrderCode: ABC123
+                  customerPhoneNumber: "+44 123 1110000"
+                  customerSessionId: '123456'
+                  orderDescription: Taxi fare
+      responses:
+        201:
+          description: Payment request completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComcardeResponse'
+              examples:
+                Successful payment:
+                  value:
+                    code: 1000
+                    message: Approved
+                    id: 4fad8e2e06a15656
+                    paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                    psp:
+                      name: Worldline Online Payments
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                Successful payment with new Card on File created:
+                  description: >
+                    The token field contains a multi-use token representing the
+                    newly created Card on File.
+                  value:
+                    code: 1000
+                    message: Approved
+                    id: 4fad8e2e06a15656
+                    paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                    psp:
+                      name: Barclaycard ePDQ - Smartpay Checkout
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                    token: e2379d46-4fff-4e6f-b9af-6dab64877d60
+                Successful payment with installments plan successfully activated:
+                  description: >
+                    The installmentsPlan field contains information about the
+                    outcome of the activated installments plan
+                  value:
+                    code: 1000
+                    message: Approved
+                    id: 4fad8e2e06a15656
+                    paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                    psp:
+                      name: Barclaycard Smartpay Fuse
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                    installmentsPlan:
+                      provider: Visa Installments
+                      code: 1000
+                      message: Approved
+                      planActivationId: c58753d6-71b6-48e7-88d0-d383c0e03f69
+                    token: e2379d46-4fff-4e6f-b9af-6dab64877d60
+                Successful payment with pspToken and pspCardFingerPrint:
+                  description: >
+                    For retail channel configured with Vault Interoperability, the token from the PSP and the
+                    fingerprint for the card are returned for the first BR-DGE Card on File payment with this PSP
+                  value:
+                    code: 1000
+                    message: Approved
+                    id: 4fad8e2e06a15656
+                    paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                    psp:
+                      name: Barclaycard ePDQ - Smartpay Checkout
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                      pspToken: src_5ormqfczt43efnx7xe2mwod4vq,
+                      pspCardFingerprint: C7BB2667AF7EDEA0745B8C2E8B7B68ED447711B794BA3151B3D91E2A63E40102
+                    token: e2379d46-4fff-4e6f-b9af-6dab64877d60
+          links:
+            Get status of a Payment:
+              operationId: getPaymentStatusUsingGET
+              parameters:
+                paymentId: '$response.body#/paymentId'
+              description: >
+                The `paymentId` value returned in the response can be used as
+                the `paymentId` parameter in `GET /payments/{paymentId}/status`.
+            Refund a Payment:
+              operationId: createRefundUsingPOST
+              parameters:
+                paymentId: '$response.body#/paymentId'
+              description: >
+                The `paymentId` value returned in the response can be used as
+                the `paymentId` parameter in `POST
+                /payments/{paymentId}/refund`.
+        202:
+          description: >
+            The operation has been accepted for processing and the outcome is not yet known.
+
+            If an action is in the response, please see [post-response-actions], otherwise
+            please refer to the webhook callbacks that are linked to this operation.
+
+
+            [post-response-actions]: https://secure.comcarde.com/docs/rest-api/#post-response-actions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComcardeResponse'
+              examples:
+                Further action required to make 3D Secure payment:
+                  value:
+                    code: 2001
+                    message: 3D Secure action required
+                    id: 4fad8e2e06a15656
+                    paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                    psp:
+                      name: Worldline Online Payments
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                    actionRequired: true
+                    action:
+                      type: 3D_SECURE
+                      paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                      data:
+                        clientToken: aaabbb
+                        verifyCardPayload: payload
+                        psp: BR
+                    threeDSecureAction:
+                      clientToken: aaabbb
+                      verifyCardPayload: payload
+                  description: >
+                    The content of `$response.body#/action` can be passed to
+                    our [Web SDK Post Response Module] to be handled and converted
+                    into a nonce that can be used to progress the payment as a
+                    `ProviderThreeDSecureNonce` payment instrument.
+
+
+                    [Web SDK Post Response Module]: https://secure.comcarde.com/docs/web-sdk/pluggable-modules/web-sdk-post-response-module
+                Further action required to make 3-D Secure payment with new Card on File:
+                  value:
+                    code: 2001
+                    message: 3D Secure action required
+                    id: 4fad8e2e06a15656
+                    paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                    psp:
+                      name: Worldline Online Payments
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                    token: 4a0f4f46-addc-4f76-8bad-5ade9e7020fb
+                    actionRequired: true
+                    action:
+                      type: 3D_SECURE
+                      paymentId: 22669f90-5bf0-45df-ba8c-ea6d4235a5da
+                      data:
+                        clientToken: aaabbb
+                        verifyCardPayload: payload
+                        psp: BR
+                    threeDSecureAction:
+                      clientToken: aaabbb
+                      verifyCardPayload: payload
+                  description: >
+                    The token field contains a multi-use token representing the
+                    newly created Card on File. Some PSPs automatically apply 3-D
+                    Secure authentication to the first payment made using a
+                    Card on File.
+
+
+                    The content of `$response.body#/action` can be passed to
+                    our [Web SDK Post Response Module] to be handled and converted
+                    into a nonce that can be used to progress the payment as a
+                    `ProviderThreeDSecureNonce` payment instrument.
+
+
+                    [Web SDK Post Response Module]: https://secure.comcarde.com/docs/web-sdk/pluggable-modules/web-sdk-post-response-module
+                Redirect Flow Action Response:
+                  value:
+                    code: 2101
+                    message:
+                      'Pending: The operation has been accepted for processing
+                      and the outcome is not yet known'
+                    id: e420b8c90d62feb3
+                    paymentId: fae9dad4-7bc4-4b30-a8c0-57f5f091e3b2
+                    psp:
+                      name: Trust Payments
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                    actionRequired: true
+                    action:
+                      type: REDIRECT
+                      paymentId: fae9dad4-7bc4-4b30-a8c0-57f5f091e3b2
+                      data:
+                        errorUrl: https://myurl.com/success?bridgePaymentId=fae9dad4-7bc4-4b30-a8c0-57f5f091e3b2
+                        provider: IDEAL
+                        providerTransactionId: 58-86-168300
+                        successUrl: https://myurl.com/success?bridgePaymentId=fae9dad4-7bc4-4b30-a8c0-57f5f091e3b2
+                        url: https://r3.girogate.de/ti/dumbdummy?tx=902589716&rs=ziwUjfJ3DyYq2OfvhCvwTzm2yBUp27VK
+                    pspId: TRUST
+                  description: >
+                    The content of `$response.body#/action` can be passed to
+                    our [Web SDK Post Response Module] which will handle the redirect for you.
+
+
+                    Some [Payment Instruments] use the [BR-DGE Redirect Payment Flow]
+                    which require shoppers to be redirected to a third party
+                    URL.
+
+
+                    The above example shows the data returned for iDEAL, but the
+                    action data will vary depending between Payment Instruments.
+
+
+                    [Web SDK Post Response Module]: https://secure.comcarde.com/docs/web-sdk/pluggable-modules/web-sdk-post-response-module
+
+                    [Payment Instruments]: https://secure.comcarde.com/docs/#payment-instrument
+
+                    [BR-DGE Redirect Payment Flow]: https://secure.comcarde.com/docs/#redirect-payment-flow
+                Pending:
+                  value:
+                    code: 2101
+                    message: Pending - The operation has been accepted for processing and the outcome is not yet known
+                    id: 4fad8e2e06a15656
+                    status: AUTHORIZATION_PENDING
+                    psp:
+                      name: Worldline Online Payments
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+        400:
+          description: >
+            Bad request - the request was in an invalid format or contained
+            invalid information.
+
+
+            If have any questions about why you are receiving these responses,
+            ** Customer support
+            please contact <support@br-dge.to> with the `id` from the
+            response so we track down the individual requests on our end.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComcardeResponse'
+              examples:
+                Bad request with validation errors:
+                  value:
+                    code: 4000
+                    message: Request Error - The request is invalid
+                    id: 4fad8e2e06a15656
+                    validationErrors:
+                      paymentInstrument.pan:
+                        [
+                          4030203 - The value entered for Pan is incorrect. It
+                          is not a valid card PAN.,
+                        ]
+                      paymentInstrument.expiryDate:
+                        [4030301 - Expiry Date cannot be blank.]
+                  description: >
+                    This example shows the [4030203] and [4030301] **Validation Errors**.
+
+
+                    A full list of possible validation errors are available [here].
+
+
+                    [4030203]: https://secure.comcarde.com/docs/rest-api/validation-errors#4030203
+
+                    [4030301]: https://secure.comcarde.com/docs/rest-api/validation-errors#4030301
+
+                    [here]: https://secure.comcarde.com/docs/rest-api/validation-errors
+
+        401:
+          description: Unauthorized request.
+        500:
+          description: >
+            An internal server error was encountered while processing the
+            payment request.
+
+            ** Customer support
+            If have any questions about why you are receiving these responses,
+            please contact <support@br-dge.to> with the `id` from the
+            response so we track down the individual requests on our end.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComcardeResponse'
+              examples:
+                Internal server error:
+                  value:
+                    code: 5001
+                    message:
+                      Server Error - An unexpected error occurred when
+                      processing the request
+                    id: 4fad8e2e06a15656
+                    status: REJECTED
+                    psp:
+                      name: Checkout.com
+                      transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+                  description: >
+                    This example shows the [5001 error code]
+
+
+                    A full list of possible response codes is available [here].
+
+
+                    [5001 error code]: https://secure.comcarde.com/docs/rest-api/response-codes#5001
+
+                    [here]: https://secure.comcarde.com/docs/rest-api/response-codes
+        502:
+          description: >
+            An error occurred upstream while processing the payment request,
+            possibly on payment processor.
+
+            ** Customer support
+            If have any questions about why you are receiving these responses,
+            please contact <support@br-dge.to> with the `id` from the
+            response so we track down the individual requests on our end.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComcardeResponse'
+              examples:
+                Payment processor network error:
+                  value:
+                    code: 5301
+                    message: Network Error - Payment processor unavailable
+                    id: 4fad8e2e06a15656
+                    psp:
+                      name: Nuvei
+                  description: >
+                    This example shows the [5301 error code]
+
+
+                    A full list of possible response codes is available [here].
+
+
+                    [5301 error code]: https://secure.comcarde.com/docs/response-codes#5301
+
+                    [here]: https://secure.comcarde.com/docs/rest-api/response-codes
+      callbacks:
+        Payment Status Change Events:
+          'https://example.com/BR-DGE/ as defined in your retail channel config':
+            post:
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/PaymentCallback'
+                    examples:
+                      authorization-pending:
+                        $ref: '#/components/examples/authorization-pending'
+                      capture-pending:
+                        $ref: '#/components/examples/capture-pending'
+                      captured:
+                        $ref: '#/components/examples/captured'
+                      declined:
+                        $ref: '#/components/examples/declined'
+                      rejected:
+                        $ref: '#/components/examples/rejected'
+                      capture-failed:
+                        $ref: '#/components/examples/capture-failed'
+              responses:
+                '200':
+                    description: Your server returns this code if it accepts the callback
+        Vault Interoperability Events:
+          'https://example.com/BR-DGE/ as defined in your retail channel config':
+            post:
+              description: If vault interoperability is enabled a token
+                will be generated the first time a Card-on-File is used
+                on a PSP connection. This allows you to have contingencies in
+                place in case you wish to process directly to the PSP.
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/PspTokenCallback'
+                    example:
+                      type: pspToken
+                      id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+                      merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+                      code: '1000'
+                      message: 'PSP Token generated'
+                      status: CAPTURED
+                      psp:
+                        name: Checkout.com
+                        transactionId: 'a83a53a2-dcc8-45be-bf70-2b1e4b719f7c'
+                        tokenId: 'src_5ormqfczt43efnx7xe2mwod4vq'
+                        pspCardFingerprint: 'C7BB2667AF7EDEA0745B8C2E8B7B68ED447711B794BA3151B3D91E2A63E40102'
+              responses:
+                '200':
+                    description: Your server returns this code if it accepts the callback
+components:
+  schemas:
+    Action:
+      title: Action
+      type: object
+      properties:
+        type:
+          type: string
+          description: >-
+            Value indicating the type of this post-response action.
+          example: 3D_SECURE
+        paymentId:
+          type: string
+          description: >-
+            The ID of the payment that this post-response action relates to.
+          example: '57f7f444-29ce-4230-8c7f-1c1fd85c8bc9'
+        data:
+          type: object
+          additionalProperties:
+            type: string
+          description:
+            A map that contains key/value pairs representing data needed to
+            process this post-response action.
+    Address:
+      title: Address
+      required:
+        - address1
+        - country
+        - town
+      type: object
+      properties:
+        firstName:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: |-
+            First name of the occupant.
+
+            Please use only letters, spaces and these symbols: `-'.`
+          example: John
+        lastName:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: |-
+            Last name of the occupant.
+
+            Please use only letters, spaces and these symbols: `-'.`
+          example: Smith
+        buildingNumberOrName:
+          maxLength: 100
+          minLength: 0
+          type: string
+          example: 10a
+          description: |-
+            The building number or name.
+
+            Providing a building number or name separate from `address1` is recommended as
+            some payment service provider (PSP) APIs have a separate field.
+
+            If you are unsure whether you need to collect this data, please contact us at <support@br-dge.to>.
+
+            Please use only letters, spaces and these symbols: `-'.`
+        address1:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: |-
+            First line of the address.
+
+            Please use only letters, numbers, spaces and these symbols: `'[]()@?!\-/.,_&*:;+=`
+          example: Flat 1
+        address2:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: |-
+            Second line of the address.
+
+            Please use only letters, numbers, spaces and these symbols: `'[]()@?!\-/.,_&*:;+=`
+          example: Victoria House
+        address3:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: |-
+            Third line of the address.
+
+            Please use only letters, numbers, spaces and these symbols: `'[]()@?!\-/.,_&*:;+=`
+          example: 15 Apple Street
+        town:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: |-
+            Town of the address.
+
+            Please use only letters, numbers, spaces and these symbols: `'[]()@?!\-/.,_&*:;+=`
+          example: Edinburgh
+        county:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: |-
+            County of the address.
+
+            Please use only letters, numbers, spaces and these symbols: `'[]()@?!\-/.,_&*:;+=`
+          example: Lothian
+        postcode:
+          type: string
+          description: |-
+            Postcode of the address.
+
+            Please use at least one and no more than 9 alphanumeric characters (excl. spaces).
+          example: BH23 6AA
+        country:
+          type: string
+          description: ISO Alpha-2 Country code of the address.
+          example: GB
+        phoneNumber:
+          maxLength: 255
+          minLength: 0
+          pattern: ^$|^[+]?[0-9 ]+[0-9]$
+          type: string
+          description: |-
+            Telephone number of the occupant
+            Please use only numbers, spaces and this symbol: `+`
+          example: +44 123 1110000
+    ApplePay:
+      title: ApplePay
+      description: >
+        A type of [Payment
+        Instrument](https://secure.comcarde.com/docs/#payment-instrument)
+      required:
+        - nonce
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of payment instrument.
+          example: applePay
+          enum:
+            - applePay
+        nonce:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description:
+            Nonce value that represents the details of the ApplePay payment.
+          example: BR#00000000-0000-0000-0000-000000000000
+    BrowserData:
+      title: BrowserData
+      description: >
+        Information about the browser used to collect payment details.
+
+
+        This data is required by some Payment Service Providers as part of their
+        3D Secure flow. If you are unsure whether you need to collect this data,
+        please contact us at <support@br-dge.to>.
+      type: object
+      properties:
+        acceptHeader:
+          type: string
+          description: >
+            Exact content of the HTTP accept headers as sent to the merchant
+            from the cardholders browser.
+          example: application/json
+        colorDepth:
+          type: string
+          description:
+            Value representing the bit depth of the color palette for displaying
+            images, in bits per pixel. Obtained from cardholder browser using
+            the `screen.colorDepth` browser property.
+          example: '32'
+        javaEnabled:
+          type: boolean
+          description:
+            Boolean that represents the ability of the cardholder browser to
+            execute java. Value is returned from the `navigator.javaEnabled` browser
+            property.
+          example: true
+        language:
+          type: string
+          description:
+            Value representing the browser language as defined in IETF BCP47.
+            Returned from `navigator.language` browser property.
+          example: en-GB
+        screenHeight:
+          type: integer
+          description: "Total height of the cardholders screen in pixels.\
+            \ Value is returned from the `screen.height` browser property."
+          format: int32
+          example: 768
+        screenWidth:
+          type: integer
+          description: "Total width of the cardholders screen in pixels.\
+            \ Value is returned from the `screen.width` browser property."
+          format: int32
+          example: 1024
+        timeZone:
+          type: integer
+          description:
+            Time difference between UTC time and the cardholder browser local
+            time, in minutes.
+
+
+            This can be retrieved by running `new Date().getTimezoneOffset();`
+            within the browser.
+          format: int32
+          example: 800
+        userAgent:
+          type: string
+          description:
+            Exact content of the HTTP user-agent header, as sent to the merchant
+            from the cardholders browser.
+          example:
+            Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML,
+            like Gecko) Chrome/67.0.3396.99 Safari/537.36
+    Card:
+      title: Card
+      description: >
+        A type of [Payment
+        Instrument](https://secure.comcarde.com/docs/#payment-instrument)
+        representing a credit or debit payment card.
+      required:
+        - expiryDate
+        - pan
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - card
+        nameOnCard:
+          maxLength: 45
+          minLength: 2
+          pattern: ^([A-Z 0-9 a-z-'.]*)$
+          type: string
+          description: |-
+            Name on the credit or debit card
+            Please use only letters, numbers, spaces and these symbols: -'.
+          example: John F Doe
+        pan:
+          type: string
+          description: PAN of the credit or debit card.
+          example: 4444 3333 2222 1111
+        expiryDate:
+          type: string
+          description: Expiry date of the credit or debit card.
+          example: 01-99
+        startDate:
+          type: string
+          description: Start date of the credit or debit card.
+          example: 01-00
+        issueNumber:
+          maximum: 9
+          minimum: 1
+          type: integer
+          description: Issue number of the credit or debit card.
+          format: int32
+          example: 1
+        cv2:
+          pattern: ^[0-9]*$
+          type: string
+          description: |-
+            CV2 of the credit or debit card
+            Please use only numbers
+          example: '123'
+        tokenize:
+          type: boolean
+          description: If true, then a Card on File will be created.
+          example: false
+    ComcardeCode:
+      title: ComcardeCode
+      type: object
+      properties:
+        code:
+          type: string
+          example: 1000
+          description: A unique identifier covering the outcome of the request.
+        description:
+          type: string
+          description: A description of the outcome of the request.
+    ComcardeResponse:
+      title: ComcardeResponse
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/Action'
+        actionRequired:
+          type: boolean
+          description: >-
+            Boolean value indicating whether further action should be taken
+            after the response is received.
+          example: true
+        additionalErrorDetails:
+          type: string
+          description: >-
+            Additional information that may sometimes be returned about the reason an error occurred.
+        code:
+          type: string
+          description: >-
+            [Response Code](https://secure.comcarde.com/docs/rest-api/response-codes)
+            signifying the outcome of the request.
+          example: '1000'
+        id:
+          type: string
+          description: >
+            The ID of this request. If you can include these when querying the
+            outcome of individual requests, we can track down the root cause
+            faster.
+          example: a7f45953-1e8b-4f33-87b0-3293f4f6972f
+        installmentsPlan:
+          $ref: '#/components/schemas/InstallmentsPlan'
+        message:
+          type: string
+          description: A description of the outcome of the request.
+        paymentId:
+          type: string
+          description: The ID of this payment
+          example: 57f7f444-29ce-4230-8c7f-1c1fd85c8bc9
+        threeDSecureAction:
+          type: object
+          additionalProperties:
+            type: string
+          description: >
+            An object that contains values used to continue a 3D Secure payment.
+
+
+            Note: this field is now deprecated, and the 'action' field should be
+            used instead.
+          deprecated: true
+        token:
+          type: string
+          description: >
+            Multi-use token for Card on File, if the request asked for one to be
+            created.
+          example: 7685edd8-006b-4526-85ce-c8b31addcea6
+        validationErrors:
+          type: object
+          additionalProperties:
+            type: string
+          description: An object that contains validation errors
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        psp:
+          $ref: '#/components/schemas/PspInfo'
+    PayoutResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: >-
+            [Response
+            Code](https://secure.comcarde.com/docs/rest-api/response-codes)
+            signifying the outcome of the request.
+          example: '1000'
+        id:
+          type: string
+          description: >
+            The ID of this request. If you can include these when querying the
+            outcome of individual requests, we can track down the root cause
+            faster.
+          example: a7f45953-1e8b-4f33-87b0-3293f4f6972f
+        message:
+          type: string
+          description: A description of the outcome of the request.
+        paymentId:
+          type: string
+          description: The ID of this payment
+          example: 57f7f444-29ce-4230-8c7f-1c1fd85c8bc9
+        validationErrors:
+          type: object
+          additionalProperties:
+            type: string
+          description: An object that contains validation errors
+        status:
+          $ref: '#/components/schemas/PayoutStatus'
+        payoutEligibility:
+          $ref: '#/components/schemas/PayoutEligibility'
+        psp:
+          $ref: '#/components/schemas/PspInfo'
+    PayoutStatus:
+      type: string
+      description: >
+        Status of the payout
+
+        ## `PENDING`
+
+        The payout request has been recieved and you should
+        expect a futher notification.
+
+        ## `APPROVED`
+
+        The payout has been approved
+
+        ## `DECLINED`
+
+        A transaction has been submitted for Authorization to the Processor and
+        this request has been processed and declined. The transaction could
+        have been declined by the Processor due to rules within their system
+        [Fraud, velocity limits, value limits] or by the Card Issuer. There
+        will be an associated “reason” assigned to this state providing details
+        of the decline.
+
+        ## `REJECTED`
+
+        A transaction has been submitted for Authorization to the processor and
+        this been rejected due to a validation or a technical error. This
+        rejection can have occurred within the BR-DGE platform, the Processor
+        or the Card Issuer. There will be an associated “reason” assigned to
+        this state providing details of the rejection.
+      example: APPROVED
+      enum:
+      - PENDING
+      - APPROVED
+      - DECLINED
+      - REJECTED
+    GooglePay:
+      title: GooglePay
+      description: >
+        A type of [Payment
+        Instrument](https://secure.comcarde.com/docs/#payment-instrument)
+      required:
+        - nonce
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - googlePay
+        nonce:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description:
+            Nonce value that represents the details of the GooglePay payment.
+          example: BR#00000000-0000-0000-0000-000000000000
+    InstallmentsPlan:
+      title: InstallmentsPlan
+      description: >
+        Information about any Installments Plan was that was linked to the
+        payment request and the outcome of its activation or acceptance.
+      type: object
+      properties:
+        code:
+          type: string
+          description: >
+            [Response Code](https://secure.comcarde.com/docs/rest-api/response-codes)
+            signifying the outcome of the request.
+          example: 1000
+        message:
+          type: string
+          description: A description of the outcome of the request.
+          example: Approved
+        planActivationId:
+          type: string
+          description: >
+            Unique code that identifies the acceptance or activation of the
+            installments plan. This code comes from the installments plan
+            provider, not from BR-DGE.
+          example: 6ccc5c91-f869-4063-9368-40b4cb30c6ce
+        provider:
+          type: string
+          description: >
+            Full name of the provider of this installments plan.
+          example: Visa Installments
+    Ideal:
+      title: iDEAL
+      description: >
+        A type of [Payment
+        Instrument](https://secure.comcarde.com/docs/#payment-instrument).
+        'currencyCode' must be 'EUR'. 'billingAddress.country' must be 'NL'.
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - ideal
+        successUrl:
+          type: string
+          maxLength: 300
+          minLength: 2
+          example: https://myurl.com/success/f219ea52-d91f-4059-a560-8dd7cbd31fd0
+          description: >
+            URL that your customer's browser will be redirected to after they successfully
+            authorize a payment via iDEAL.
+
+
+            By using unpredictable single-use URLs you can protect
+            yourself from the possibility of bad actors attempting to
+            make it appear that payments had a different outcome to reality.
+            We also recommend that you confirm the outcome of payments via
+            server-to-server calls to BR-DGE.
+        errorUrl:
+          type: string
+          maxLength: 300
+          minLength: 2
+          description:
+            A url that is invoked after an unsuccessful iDEAL payment.
+          example: https://myurl.com/error
+    Bancontact:
+      title: Bancontact
+      description: >
+        A type of [Payment
+        Instrument](https://secure.comcarde.com/docs/#payment-instrument).
+        'currencyCode' must be 'EUR'. 'billingAddress.country' must be 'BE'.
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - bancontact
+        successUrl:
+          type: string
+          maxLength: 300
+          minLength: 2
+          description:
+            A url that is invoked after a successful Bancontact payment.
+          example: https://myurl.com/success
+        errorUrl:
+          type: string
+          maxLength: 300
+          minLength: 2
+          description:
+            A url that is invoked after an unsuccessful Bancontact payment.
+          example: https://myurl.com/error
+    MerchantInitiatedDetails:
+      title: Merchant Initiated Details
+      description: >
+        If the transaction is the first payment within a series of merchant
+        initiated transactions then `initialPayment` should be set to `true` and
+        `previousPaymentId` should be omitted. The paymentId that is returned
+        can then be used to make subsequent transactions, which are not cardholder
+        initiated.
+
+
+        When performing a payment that is a subsequent payment, then
+        `initialPayment` should be set to `false` or ommited, and
+        `previousPaymentId` should be set to the returned `paymentId` of the
+        initial payment.
+
+
+        This field should be used in conjunction with the `merchantInitiated`
+        field.
+      properties:
+        initialPayment:
+          type: boolean
+          default: false
+          description: >
+            `true` If this is the first transaction within a
+            series of MIT transactions (a CIT transaction)
+        previousPaymentId:
+          type: string
+          description: >
+           When the transaction is a subsequent payment, `previousPaymentId`
+           should be set to the `paymentId` returned in the initial payment. 
+
+           If `initialPayment` is set to `true`, then this field *must* be 
+           omitted.
+    PayPal:
+      title: PayPal
+      description: >
+        A type of [Payment
+        Instrument](https://secure.comcarde.com/docs/#payment-instrument).
+      required:
+        - nonce
+        - type
+      type: object
+      properties:
+        nonce:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description:
+            Nonce value that represents the details of the PayPal payment.
+          example: BR#00000000-0000-0000-0000-000000000000
+        type:
+          type: string
+          enum:
+            - payPal
+    Payment:
+      title: Payment
+      description: >
+        Represents a request to transfer funds between accounts at banks or
+        other financial institutions.
+      required:
+        - amount
+        - currencyCode
+        - customerEmail
+        - customerFirstName
+        - customerOrderCode
+        - orderDescription
+        - paymentInstrument
+      type: object
+      properties:
+        amount:
+          type: integer
+          description:
+            Value of the payment specified in the lowest denomination of the
+            given currency.
+          format: int64
+          example: 1000
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        browserData:
+          $ref: '#/components/schemas/BrowserData'
+        channel:
+          type: string
+          enum:
+            - web
+            - ios
+            - android
+          example: web
+          description: |-
+            The type of channel used by the end user for the payment.
+            E.g. If your user is using an iOS app to checkout then channel would be `ios`.
+
+            This data is required by some Payment Service Providers as part of their 3D Secure flow.
+            If you are unsure whether you need to collect this data, please contact us at
+            <support@br-dge.to>.
+        currencyCode:
+          type: string
+          description: Currency code of the payment (ISO 4217)
+          example: GBP
+        customerEmail:
+          maxLength: 254
+          minLength: 1
+          pattern: ^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+          type: string
+          description: Email address of the customer
+          example: a@b.com
+        customerFirstName:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: |-
+            First name of the customer (customerFirstName length plus customerLastName length must be less than 255 characters long)
+            Please use only letters, spaces and these symbols: -'.
+          example: John
+        customerIpAddress:
+          pattern: ^$|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+          type: string
+          description: IP address of the customer
+          example: 123.100.100.200
+        customerLastName:
+          maxLength: 255
+          type: string
+          description: |-
+            Last name of the customer (customerFirstName length plus customerLastName length must be less than 255 characters long)
+            Please use only letters, spaces and these symbols: -'.
+          example: Smith
+        customerOrderCode:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: |-
+            Merchant’s own identifier for the transaction, which can be used to find the transaction in BR-DGE Portal.
+            This value will also be passed on to payment service providers if possible.
+
+
+            Please use only letters, numbers, spaces and these symbols:'[]()@?!\-/.,_&*:;+=
+          example: ABC123
+        customerPhoneNumber:
+          maxLength: 255
+          minLength: 0
+          pattern: ^$|^[+]?[0-9 ]+[0-9]$
+          type: string
+          description: |-
+            Telephone number of the customer
+            Please use only numbers, spaces and this symbol: +
+          example: +44 123 1110000
+        customerSessionId:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: |-
+            Session Id of the customer
+            Please use only letters, numbers, spaces and these symbols:'[]()@?!\-/.,_&*:;+=
+          example: '123456'
+        deliveryAddress:
+          $ref: '#/components/schemas/Address'
+        intent:
+          type: string
+          default: capture
+          description: >
+            By default payments are captured immediately, but you can
+            you can choose to split the authorization and the capture of the payment.
+             * `authorize` - if you intend to capture separately using
+               `POST /v1/payments/{paymentId}/capture`
+             * `capture` - If you intend to capture immediately
+          enum:
+          - "authorize"
+          - "capture"
+        merchantInitiated:
+          type: string
+          description: >
+            Payments made via BR-DGE are assumed to be Cardholder Initiated Transactions (CIT)
+            unless flagged as Merchant Initiated (MIT).
+
+
+            Merchants commonly initiate MITs without the active participation of the cardholder
+            to:
+
+            - Perform a transaction as a follow-up to a cardholder-initiated transaction (CIT)
+
+            - Perform a pre-agreed standing instruction from the cardholder for the provision of
+            goods or services
+
+
+            Examples of MITs include:
+
+            - An unscheduled charge for a service such as e-scooter hire
+
+            - A recurring payment for a magazine subscription
+
+
+            You must enter into an agreement with your customer prior to performing MITs, and
+            must use a BR-DGE Card on File Payment Instrument.
+          enum:
+          - unscheduled
+          - recurring
+        merchantInitiatedDetails:
+          $ref: '#/components/schemas/MerchantInitiatedDetails'
+        orderDescription:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: |-
+            Description of what the payment is for
+            Please use only letters, numbers, spaces and these symbols:'[]()@?!\-/.,_&*:;+=
+          example: Taxi fare
+        origin:
+          type: string
+          maxLength: 255
+          minLength: 1
+          example: https://example-store.org:8080
+          description: |-
+            The origin URL of the web page used by the end user for the payment,
+            if the `channel` is `web`.
+
+            This data is required by some payment service providers (PSPs) as part of their
+            3D Secure flow.
+            If you are unsure whether you need to collect this data, please contact us at
+            <support@br-dge.to>.
+        paymentInstrument:
+          description: >
+            Electronic instrument with which end users of payment systems use to
+            transfer funds between accounts at banks or other financial
+            institutions.
+          oneOf:
+            - $ref: '#/components/schemas/Card'
+            - $ref: '#/components/schemas/Tokenized'
+            - $ref: '#/components/schemas/PayPal'
+            - $ref: '#/components/schemas/ApplePay'
+            - $ref: '#/components/schemas/GooglePay'
+            - $ref: '#/components/schemas/Ideal'
+            - $ref: '#/components/schemas/Bancontact'
+            - $ref: '#/components/schemas/ProviderThreeDSecureNonce'
+        threeDSecureOptions:
+          $ref: '#/components/schemas/ThreeDSecureOptions'
+        threeDSecureRequired:
+          type: boolean
+          description: >
+            You can indicate that 3D Secure processing is preferred, usually
+            initializing a 3D Secure authentication flow.
+
+
+            Note that setting this as true does not guarantee that the payment
+            will end up with successful 3D Secure authentication. Also, setting
+            this to false does not guarantee that 3D Secure authentication will
+            not be applied to the payment, as some PSPs may choose to apply
+            their own rules around this regardless need to opt-in to 3D Secure
+            authentication on a per-payment basis.
+          example: true
+    PayoutRequest:
+      description: >
+        Represents a request to transfer funds to your customer
+      required:
+        - amount
+        - currencyCode
+        - paymentInstrument
+        - psp
+        - recipient
+        - reference
+      type: object
+      properties:
+        psp:
+          description: >
+            Identifier of the Payment Service Provider (PSP) you wish to route
+            this request to.
+          $ref: '#/components/schemas/PspNames'
+        amount:
+          type: integer
+          description:
+            Value of the payment specified in the lowest denomination of the
+            given currency.
+          format: int64
+          example: 1000
+        currencyCode:
+          type: string
+          description: Currency code of the payment (ISO 4217)
+          example: GBP
+        recipient:
+          type: object
+          properties:
+            firstName:
+              maxLength: 255
+              type: string
+              description: |-
+                First name of the recipient.
+
+
+                Please note that the combined length of `firstName` and `lastName` must not exceed 255 characters.
+              example: John
+              pattern: "^([\\p{L}\\p{M}\\-'. ]*)$"
+            ipAddress:
+              pattern: ^$|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+              type: string
+              description: IP address of the customer
+              example: 123.100.100.200
+            lastName:
+              maxLength: 255
+              type: string
+              description: |-
+                Last name of the recipient.
+
+
+                Please note that the combined length of `firstName` and `lastName` must not exceed 255 characters.
+              example: Smith
+              pattern: "^([\\p{L}\\p{M}\\-'. ]*)$"
+        paymentInstrument:
+          description: >
+            Electronic instrument with which end users of payment systems use to
+            transfer funds between accounts at banks or other financial
+            institutions.
+          oneOf:
+          - $ref: '#/components/schemas/Tokenized'
+          - $ref: '#/components/schemas/PayInReference'
+          discriminator:
+            propertyName: type
+            description: >
+              To help API consumers detect the object type, we have
+              provided the `type` property which can be used as a
+              discriminator to detect what type of payment instrument
+              was used.
+            mapping:
+              tokenized: '#/components/schemas/Tokenized'
+              payInReference: '#/components/schemas/PayInReference'
+          example:
+            type: tokenized
+            token: 90289ce4-e0eb-48ca-8f8c-d2793eef387e
+        reference:
+          type: string
+          maxLength: 50
+          description: >
+            A reference you can later use to identify this payout
+          example: abc123
+          pattern: ^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=\\r\\n]*)$
+        purpose:
+          type: string
+          maxLength: 50
+          description: >
+            The purpose of this payout
+          example: leisure
+          pattern: ^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=\\r\\n]*)$
+    PayInReference:
+      description: >
+        Make pay-outs to the same payment instrument as previous pay-ins if
+        the pay-in uses the following Payment Instruments
+
+        - Apple Pay
+      type: object
+      required:
+        - paymentId
+      properties:
+        paymentId:
+          type: string
+          description: Identifier of the pay-in transaction
+          example: 00000000-0000-0000-0000-000000000000
+    PayoutEligibility:
+      type: object
+      properties:
+        crossBorderGambling:
+          description: Whether the card is eligible for cross-border gambling
+            transactions
+          type: string
+          enum:
+          - NOT_SUPPORTED
+          - STANDARD
+          - FAST_FUNDS
+          - UNKNOWN
+        crossBorderMoneyTransfer:
+          description: >
+            Whether the card is eligible for cross-border money
+          type: string
+          enum:
+          - NOT_SUPPORTED
+          - STANDARD
+          - FAST_FUNDS
+          - UNKNOWN
+        crossBorderNonMoneyTransfer:
+          description: >
+            Whether the card is eligible for cross-border non-money transfer transactions
+          type: string
+          enum:
+          - NOT_SUPPORTED
+          - STANDARD
+          - FAST_FUNDS
+          - UNKNOWN
+        domesticGambling:
+          description: >
+            Whether the card is eligible for domestic gambling transactions
+          type: string
+          enum:
+          - NOT_SUPPORTED
+          - STANDARD
+          - FAST_FUNDS
+          - UNKNOWN
+        domesticMoneyTransfer:
+          description: >
+            Whether the card is eligible for domestic money transfer
+          type: string
+          enum:
+          - NOT_SUPPORTED
+          - STANDARD
+          - FAST_FUNDS
+          - UNKNOWN
+        domesticNonMoneyTransfer:
+          description: >
+            Whether the card is eligible for domestic non-money transfer transactions
+          type: string
+          enum:
+          - NOT_SUPPORTED
+          - STANDARD
+          - FAST_FUNDS
+          - UNKNOWN
+    Callback:
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/PaymentCallback'
+      - $ref: '#/components/schemas/RefundCallback'
+      - $ref: '#/components/schemas/PayoutCallback'
+      discriminator:
+        propertyName: type
+        description: >
+          To help API consumers detect the callback type, we have
+          provided the `type` property.
+        mapping:
+          payment: '#/components/schemas/PaymentCallback'
+          refund: '#/components/schemas/RefundCallback'
+          payout: '#/components/schemas/PayoutCallback'
+    TransactionCallback:
+      type: object
+      required:
+        - type
+        - code
+        - message
+        - merchantAccountId
+        - psp
+        - hashCode
+      properties:
+        type:
+          type: string
+        merchantAccountId:
+          type: string
+          description: >
+            Identifier of the merchant account associated with the payment
+          example: 00000000-0000-0000-0000-000000000000
+        code:
+          type: string
+          description: >-
+            [Response Code](https://secure.comcarde.com/docs/rest-api/response-codes)
+            signifying the outcome of the request
+          example: '1000'
+        message:
+          type: string
+          description: A description of the outcome
+        psp:
+          $ref: '#/components/schemas/PspInfo'
+        hashCode:
+          type: string
+          description: >
+            When we send a merchant notification we add a field with a key of
+            hashCode to the payload.
+
+
+            The value in this field is a hashCode that can be used to verify
+            that key fields in the notification message payload has not
+            been tampered with and also to confirm that it has been sent from
+            the BR-DGE platform.
+
+
+            If you have BR-DGE webhooks enabled in your retail channel then
+            you will have set a "shared secret" for use in the hashCode
+            verification process.
+
+            ## How to use the hashCode value
+
+            To verify the `hashCode` concatenate these fields in the order
+            described below and add the shared secret to the end.
+
+            ```
+              // concatenate the fields
+              const fields = notification.type + notification.merchantAccountId
+                + notification.id + notification.code + notification.message
+                + notification.status + notification.psp.message
+                + notification.psp.name + notification.psp.transactionId
+                // append the secret
+                + "my notification secret";
+            ```
+
+            ## Generate the hashCode
+
+            1. Take these concatenated fields, and run them through a SHA-256
+               hashing function.
+            2. Take the output of step 1 and use base64 to encode the resulting
+               bytes into a string.
+            3. Compare the string from step 2 with the hashcode provided in the
+               notification body. If they match then the notification is
+               genuine.
+
+            ## Examples of how to perform a validation
+
+            ### 1. Validation via Javascript code example
+
+            JavaScript has cryptographic functions available under the
+            [CryptoJS](https://www.npmjs.com/package/crypto-js) library.
+            The CryptoJS library allows us to use UTF-8 and Base64 encoders as
+            well as the SHA256 hashing function.
+
+            ```js
+              // get the fields as bytes and SHA-256 then.
+              const bytes = CryptoJS.enc.Utf8.parse(fields)
+              const hashBytes = CryptoJS.SHA256(bytes)
+              // encode them as Base64
+              const hashString = CryptoJS.enc.Base64.stringify(hashBytes);
+            ```
+
+            Note: The hashCode can be generated in any language that has access
+            to cryptographic functions (which should be all of them).
+
+
+            An example of the notification hashCode generation and comparison
+            can be found at
+            [this JSFiddle link](https://jsfiddle.net/aidancrooks_brdge/ofjq3hpv/9/)
+
+            ```
+              const notification = {
+                "code": "1000",
+                "hashCode": "6TqCHicL7vJOeIxP10mKU9ECsmyUDaBNiB7CNMCMbgM=",
+                "id": "171e808b-5998-40a7-a559-6cbe04c8c3cc",
+                "merchantAccountId": "checkoutOnly",
+                "message": "Approved",
+                "psp": {
+                  "message": "{\"id\":\"evt_tn5nq7xpqddexjudyfyhrst...}",
+                  "name": "Checkout.com",
+                  "transactionId": "pay_vxhcyge7pgzebfuwe34fglvucy"
+                },
+                "status": "CAPTURED",
+                "type": "payment"
+              }
+              // concatenate the fields
+              const fields = notification.type + notification.merchantAccountId
+              + notification.id + notification.code + notification.message
+              + notification.status + notification.psp.message
+              + notification.psp.name + notification.psp.transactionId
+              // append the secret
+              + "my notification secret";
+
+              // get the fields as bytes and SHA-256 then.
+              const bytes = CryptoJS.enc.Utf8.parse(fields)
+              const hashBytes = CryptoJS.SHA256(bytes)
+              // encode them as Base64
+              const hashString = CryptoJS.enc.Base64.stringify(hashBytes);
+
+              // the resulting hashString should match the notification hashCode
+
+              // display
+              document.getElementById("fields").innerHTML = fields;
+              document.getElementById("hash").innerHTML = notification.hashCode;
+              document.getElementById("display").innerHTML = hashString;
+            ```
+
+            ### 2. Manual validation example
+
+            This can be manually verified using <https://cryptii.com/>
+    PaymentCallback:
+      allOf:
+      - $ref: '#/components/schemas/TransactionCallback'
+      - type: object
+        required:
+          - type
+          - status
+          - id
+        properties:
+          type:
+            type: string
+            description: Will always be set to `payment`.
+          id:
+            type: string
+            description: Unique identifier for the payment
+            example: 2c6a34be-f7a1-4b49-b09c-e84e1322df7f
+          status:
+            $ref: '#/components/schemas/PaymentStatus'
+    RefundCallback:
+      allOf:
+      - $ref: '#/components/schemas/TransactionCallback'
+      - type: object
+        required:
+          - type
+        properties:
+          type:
+            type: string
+            enum:
+            - refund
+          id:
+            type: string
+            description: Unique identifier for the refund
+            example: 44ff520b-dfca-4476-99bd-239379ff9b43
+          status:
+            type: string
+            description: >
+              Status of the refund
+
+              ## `PENDING`
+
+              The refund request has been recieved and you should
+              expect a futher notification.
+
+              ## `APPROVED`
+
+              The refund has been approved
+
+              ## `DECLINED`
+
+              The refund has been declined.
+
+            example: APPROVED
+            enum:
+            - PENDING
+            - APPROVED
+            - DECLINED
+    PayoutCallback:
+      allOf:
+      - $ref: '#/components/schemas/TransactionCallback'
+      - type: object
+        required:
+          - type
+          - status
+          - payout
+        properties:
+          type:
+            type: string
+            enum:
+            - payout
+          id:
+            type: string
+            description: Unique identifier for the payout
+            example: 0c0bb671-bd23-489c-a9e2-235e583de167
+          payout:
+            type: object
+            description: Information about the payout
+            required:
+              - type
+            properties:
+              type:
+                type: string
+                description: Whether the payout was of type standard,
+                  fast funds, or unknown.
+                default: UNKNOWN
+                enum:
+                - STANDARD
+                - FAST_FUNDS
+                - UNKNOWN
+          status:
+            $ref: '#/components/schemas/PayoutStatus'
+    PspTokenCallback:
+      type: object
+      required:
+        - type
+        - code
+        - message
+        - merchantAccountId
+        - psp
+        - hashCode
+      properties:
+        type:
+          type: string
+          description: Always set to `pspToken`.
+        merchantAccountId:
+          type: string
+          description: >
+            Identifier of the merchant account associated with the payment
+          example: 00000000-0000-0000-0000-000000000000
+        code:
+          type: string
+          description: >-
+            [Response Code](https://secure.comcarde.com/docs/rest-api/response-codes)
+            signifying the outcome of the request
+          example: '1000'
+        message:
+          type: string
+          description: A description of the outcome
+        psp:
+          allOf:
+          - $ref: '#/components/schemas/PspInfo'
+          - type: object
+            properties:
+              pspToken:
+                type: string
+                description: >
+                  The token created by the PSP for the payment instrument
+              pspCardFingerprint:
+                type: string
+                description: >
+                  The PSP fingerprint for the payment instrument
+        hashCode:
+          type: string
+          description: >
+            When we send a merchant notification we add a field with a key of
+            hashCode to the payload.
+
+
+            The value in this field is a hashCode that can be used to verify
+            that key fields in the notification message payload has not
+            been tampered with and also to confirm that it has been sent from
+            the BR-DGE platform.
+
+
+            If you have BR-DGE webhooks enabled in your retail channel then
+            you will have set a "shared secret" for use in the hashCode
+            verification process.
+
+            ## How to use the hashCode value
+
+            To verify the `hashCode` concatenate these fields in the order
+            described below and add the shared secret to the end.
+
+            ```
+              // concatenate the fields
+              const fields = notification.type + notification.merchantAccountId
+                + notification.id + notification.code + notification.message
+                + notification.status + notification.psp.message
+                + notification.psp.name + notification.psp.transactionId
+                // append the secret
+                + "my notification secret";
+            ```
+
+            ## Generate the hashCode
+
+            1. Take these concatenated fields, and run them through a SHA-256
+               hashing function.
+            2. Take the output of step 1 and use base64 to encode the resulting
+               bytes into a string.
+            3. Compare the string from step 2 with the hashcode provided in the
+               notification body. If they match then the notification is
+               genuine.
+
+            ## Examples of how to perform a validation
+
+            ### 1. Validation via Javascript code example
+
+            JavaScript has cryptographic functions available under the
+            [CryptoJS](https://www.npmjs.com/package/crypto-js) library.
+            The CryptoJS library allows us to use UTF-8 and Base64 encoders as
+            well as the SHA256 hashing function.
+
+            ```js
+              // get the fields as bytes and SHA-256 then.
+              const bytes = CryptoJS.enc.Utf8.parse(fields)
+              const hashBytes = CryptoJS.SHA256(bytes)
+              // encode them as Base64
+              const hashString = CryptoJS.enc.Base64.stringify(hashBytes);
+            ```
+
+            Note: The hashCode can be generated in any language that has access
+            to cryptographic functions (which should be all of them).
+
+
+            An example of the notification hashCode generation and comparison
+            can be found at
+            [this JSFiddle link](https://jsfiddle.net/aidancrooks_brdge/ofjq3hpv/9/)
+
+            ```
+              const notification = {
+                "code": "1000",
+                "hashCode": "6TqCHicL7vJOeIxP10mKU9ECsmyUDaBNiB7CNMCMbgM=",
+                "id": "171e808b-5998-40a7-a559-6cbe04c8c3cc",
+                "merchantAccountId": "checkoutOnly",
+                "message": "Approved",
+                "psp": {
+                  "message": "{\"id\":\"evt_tn5nq7xpqddexjudyfyhrst...}",
+                  "name": "Checkout.com",
+                  "transactionId": "pay_vxhcyge7pgzebfuwe34fglvucy"
+                },
+                "status": "CAPTURED",
+                "type": "payment"
+              }
+              // concatenate the fields
+              const fields = notification.type + notification.merchantAccountId
+              + notification.id + notification.code + notification.message
+              + notification.status + notification.psp.message
+              + notification.psp.name + notification.psp.transactionId
+              // append the secret
+              + "my notification secret";
+
+              // get the fields as bytes and SHA-256 then.
+              const bytes = CryptoJS.enc.Utf8.parse(fields)
+              const hashBytes = CryptoJS.SHA256(bytes)
+              // encode them as Base64
+              const hashString = CryptoJS.enc.Base64.stringify(hashBytes);
+
+              // the resulting hashString should match the notification hashCode
+
+              // display
+              document.getElementById("fields").innerHTML = fields;
+              document.getElementById("hash").innerHTML = notification.hashCode;
+              document.getElementById("display").innerHTML = hashString;
+            ```
+
+            ### 2. Manual validation example
+
+            This can be manually verified using <https://cryptii.com/>
+    PspInfo:
+      type: object
+      required:
+        - name
+        - transactionId
+      properties:
+        name:
+          description: The PSP this payment was routed to.
+          $ref: '#/components/schemas/PspNames'
+        transactionId:
+          type: string
+          description: >
+            Idenfitier provided by the PSP this payment was routed to.
+          example: 6418da68-0b3d-4409-ab14-1ceb752b0b1f
+        message:
+          type: string
+          description: Original message provided by PSP if applicable.
+    PspNames:
+      type: string
+      description: Names of Payment Service Providers
+      example: Checkout.com
+      enum:
+      - Barclaycard ePDQ - Smartpay Checkout
+      - Braintree
+      - Barclaycard Smartpay Fuse
+      - Checkout.com
+      - Cybersource
+      - Nuvei
+      - PayPal-Direct
+      - Stripe
+      - Trust Payments
+      - Worldline Online Payments
+    PaymentStatus:
+      type: string
+      description: >
+        Status of the payment
+
+        ## `DECLINED`
+
+        A transaction has been submitted for Authorization to the Processor
+        and this request has been processed and declined. The transaction
+        could have been declined by the Processor due to rules within their
+        system [Fraud, velocity limits, value limits] or by the Card Issuer.
+        There will be an associated “reason” assigned to this state providing
+        details of the decline.
+
+        ## `REJECTED`
+
+        A transaction has been submitted for Authorization to the processor
+        and this been rejected due to a validation or a technical error. This
+        rejection can have occurred within the BR-DGE platform, the Processor
+        or the Card Issuer.  There will be an associated “reason” assigned to
+        this state providing details of the rejection.
+
+        ## `AUTHORIZATION_PENDING`
+
+        A transaction has been submitted for Authorization to the Processor and
+        this request has been accepted by the Processor but the outcome has not
+        been determined.
+
+        ## `AUTHORIZED`
+
+        A transaction has been submitted for Authorization to the Processor and
+        this request has been processed and Authorized. The transaction is now
+        available to be included in a Capture request. Where the merchant is
+        enrolled for auto capture with the Processor, the transaction status will
+        be set directly to `CAPTURED`
+
+        ## `CAPTURE_PENDING`
+
+        An Authorized transaction has been submitted for capture and this request
+        has been accepted by the Processor but the outcome has not been determined.
+
+        ## `CAPTURED`
+
+        An Authorized transaction has been submitted for capture and this request has
+        been accepted and confirmed by the Processor.
+
+        ## `CAPTURE_FAILED`
+
+        A transaction has been submitted for Authorization to the Processor and this
+        request has been processed and failed. There will be an associated “reason”
+        assigned to this state providing details of the failure.
+
+        ## `VOIDED`
+
+        The merchant has requested that a Authorized transaction is cancelled / voided
+        and the Processor has accepted the void request.
+      example: CAPTURED
+      enum:
+      - DECLINED
+      - REJECTED
+      - AUTHORIZATION_PENDING
+      - AUTHORIZED
+      - CAPTURE_PENDING
+      - CAPTURED
+      - CAPTURE_FAILED
+      - VOIDED
+    ProviderThreeDSecureNonce:
+      description: |-
+        A type of [Payment Instrument].
+
+        Part of the 3-D Secure flow. In the event that you get a 3-D Secure additional
+        action required response to a payment request, you can use the
+        [BR-DGE Web SDK Post Response Module] to handle the action and convert it into
+        a nonce you can use to complete the payment with a ProviderThreeDSecureNonce
+        Payment Instrument.
+
+
+        [BR-DGE Web SDK Post Response Module]: https://secure.comcarde.com/docs/web-sdk/pluggable-modules/web-sdk-post-response-module
+
+        [Payment Instrument]: https://secure.comcarde.com/docs/#payment-instrument
+      required:
+        - nonce
+        - paymentId
+        - type
+      type: object
+      properties:
+        paymentId:
+          type: string
+          description: Payment ID of the payment
+          example: 00000000-0000-0000-0000-000000000000
+        type:
+          type: string
+          description: Type of payment instrument
+          example: providerThreeDSecureNonce
+          enum:
+            - providerThreeDSecureNonce
+        nonce:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description:
+            Nonce value that represents the details of the payment along with
+            its 3D Secure authentication outcome
+          example: BR#00000000-0000-0000-0000-000000000000
+    Refund:
+      title: Refund
+      description:
+        Represents a request to refund all or part of an existing payment
+      type: object
+      properties:
+        amount:
+          type: integer
+          description:
+            Amount to be refunded on this transaction, or null for full refund
+          format: int64
+          example: 100
+    ThreeDSecureOptions:
+      title: ThreeDSecureOptions
+      description: >
+        Some Payment Service Providers allow you to pass parameters to indicate
+        your preferences relating to 3D Secure.
+
+
+        Note: We cannot guarantee that downstream Payment Service Providers will
+        honour your preferences, but we can ensure that your preferences are
+        passed on whenever possible.
+      type: object
+      properties:
+        challengeRequested:
+          type: boolean
+          description:
+            Indicates whether the payment request should result in a 3D Secure
+            challenge and not experience a frictionless flow, if handled by a
+            payment service provider that supports this feature.
+          example: false
+        exemptionRequested:
+          type: boolean
+          description:
+            Indicates whether the payment request should be considered for a 3D
+            Secure exemption, if handled by a payment service provider that
+            supports this feature.
+          example: false
+    Tokenized:
+      title: Tokenized
+      description: >
+        A type of [Payment
+        Instrument](https://secure.comcarde.com/docs/#payment-instrument) that
+        can be used in place of sensitive cardholder data.
+      required:
+        - token
+        - type
+      type: object
+      properties:
+        token:
+          maxLength: 200
+          minLength: 1
+          type: string
+          description: |-
+            The token that represents a payment instrument
+            Please use only letters, numbers, spaces and these symbols:'[]()@?!\-/.,_&*:;+=
+          example: 00000000-0000-0000-0000-000000000000
+        type:
+          type: string
+          description: Type of payment instrument
+          example: tokenized
+          enum:
+            - tokenized
+        cv2:
+          maxLength: 4
+          minLength: 3
+          pattern: ^[0-9]*$
+          type: string
+          description: |-
+            Optional CV2 of the Tokenized payment instrument, if you haven't already provided it during the tokenization process.
+            Please use only numbers
+          example: '123'
+    ObfuscatedCard:
+      description: >
+        Information about card payment instruments. This can be used to help
+        cardholders identify which of their cars were used (without becoming PCI
+        sensitive) in addition to the metadata providing useful insights for
+        merchants.
+      type: object
+      properties:
+        tokenType:
+          type: string
+          example: 'CARD'
+          description: 'Always `CARD`'
+          enum: ['CARD']
+        cardType:
+          type: string
+          description: >
+            Please use `metadata`.`cardBrand` instead.
+
+
+            This field is now deprecated and will be removed in a future update.
+          example: VISA
+          deprecated: true
+        nameOnCard:
+          type: string
+          description: Name on the credit or debit card.
+          example: John F Doe
+        pan:
+          type: string
+          description: PAN of the credit or debit card in obfuscated form.
+          example: '**** **** **** 1111'
+        expiryDate:
+          type: string
+          description: Expiry date of the credit or debit card.
+          example: 06-30
+        startDate:
+          type: string
+          description: Start date of the credit or debit card.
+          example: 01-20
+        issueNumber:
+          type: integer
+          description: Issue number of the credit or debit card.
+          format: int32
+        customerId:
+          type: string
+          description: >
+            ID of the merchant's customer who owns the payment instrument (if
+            available)
+          example: example-customer-id
+        pspTokens:
+          type: array
+          description: a set of psp tokens linked to this Card-on-File
+          items:
+            type: object
+            description: PSP Token linked to this Card-on-File
+            properties:
+              pspName:
+                $ref: '#/components/schemas/PspNames'
+                description: Identifier for the Payment Service Provider (PSP)
+                  associated with the token.
+              token:
+                type: string
+                description: the token generate by the psp
+              pspCardFingerprint:
+                type: string
+                description: The PSP fingerprint for the payment instrument (if available)
+        fingerprint:
+          type: string
+          description: >
+            A unique token that can be used to detect if two BR-DGE tokens represent
+            the same underlying Payment Instrument.
+          example: '63c8563d876b993878e1b5506b5fc5826e9e46266daaadac018a71ed307748c6'
+        cardArtUri:
+          type: string
+          description: URI to card art
+          format: uri
+          example: https://example.com/card-art/09a29968-f53f-4bdb-9744-6033996ee55f
+        metadata:
+          $ref: '#/components/schemas/CardMetadata'
+        networkToken:
+          type: object
+          description: >
+            Information about a Network Token associated to this BR-DGE Card-on-File
+            if available.
+          properties:
+            id:
+              type: string
+              description: A unique identifier that represents the token associated
+                with a card enrolled into the Card Network Service
+              example: WXdfRANqUrBalltlBKaaWHVGrFoWrIHsZAK
+            token:
+              type: string
+              description: The unique token for the enrolled PAN which can be used
+                in authorization as per ISO/IEC 7812 format.
+              example: 5186151969968300
+            expiryDate:
+              type: string
+              description: Expiration date of the token, noted in MM-YY Format
+              example: 08-26
+            issuer:
+              type: string
+              enum:
+              - MASTERCARD
+              - VISA
+              description: The issuing card network of the network token
+              example: MASTERCARD
+            status:
+              type: string
+              enum:
+              - ACTIVE
+              - DISABLED
+              - DELETED
+              description: >
+                The status of the network token.
+
+
+                - `ACTIVE` Can be used to provision Cryptograms for payments.
+
+                - `DISABLED` This can be due to card suspensions, fraud, or other
+                  temporary hold reasons and may be re-activated at a later date.
+
+                - `DELETED` The token is no longer valid and cannot be re-activated.
+                  This can be due to token expirations, lost card or other
+                  non-temporary reasons.
+              example: ACTIVE
+            tokenUniqueReference:
+              type: string
+              description: Unique identifier for the network token provided by the
+                Card Network
+              example: DM4MMC0000000001cd2826c715b7475bb089b7622366ebe4
+            paymentAccountReference:
+              type: string
+              description: >
+                A non-financial reference assigned to each unique funding PAN (FPAN)
+                that's used to link the payment account of that PAN to affiliated
+                payment tokens.
+              example: 5001EUMYTT3AESCZGUEC77KPCLETI
+    ResponseMapObfuscatedCard:
+      title: ResponseMapObfuscatedCard
+      type: object
+      description: Map of Cards on File, keyed by their multi-use token.
+      properties:
+        id:
+          type: string
+          description: >
+            The ID of this request. If you can include these when querying the
+            outcome of individual requests, we can track down the root cause
+            faster.
+        results:
+          type: object
+          description: Map of obfuscated cards keyed by multi-use token
+          additionalProperties:
+            $ref: '#/components/schemas/ObfuscatedCard'
+      example:
+        id: example-response-trace-id
+        results:
+          3d967f3e-8710-4c2b-9828-28b9531617f1:
+            cardType: VISA
+            nameOnCard: John F Doe
+            pan: '**** **** **** 1111'
+            expiryDate: 06-30
+            startDate: 01-20
+            issueNumber: 0
+            customerId: example-customer-id
+            tokenType: 'CARD'
+            metadata:
+              cardBrand: 'VISA'
+              issuer: 'ACMEBANK'
+              type: 'DEBIT'
+              category: 'CLASSIC'
+              countryIsoA2: 'GB'
+              commercial: true
+            fingerprint: '63c8563d876b993878e1b5506b5fc5826e9e46266daaadac018a71ed307748c6'
+          example-token-2:
+            cardType: MASTERCARD
+            nameOnCard: Jane Doe
+            pan: '**** **** **** 1234'
+            expiryDate: 07-31
+            startDate: 09-21
+            issueNumber: 2
+            customerId: example-customer-id
+            tokenType: 'CARD'
+            metadata: null
+            fingerprint: '63c8563d876b993878e1b5506b5fc5826e9e46266daaadac018a71ed307748c6'
+          4c5f1e1d-a8d4-403c-8199-e9705da98735:
+            cardType: MASTERCARD
+            nameOnCard: John F Doe
+            pan: '**** **** **** 4321'
+            expiryDate: 02-29
+            startDate: 10-20
+            customerId: example-customer-id
+            tokenType: 'CARD'
+            metadata:
+              cardBrand: 'MASTERCARD'
+              issuer: null
+              type: 'DEBIT'
+              category: null
+              countryIsoA2: 'GB'
+              commercial: null
+            fingerprint: '63c8563d876b993878e1b5506b5fc5826e9e46266daaadac018a71ed307748c6'
+    TokenResponse:
+      description: >
+        A single-use token representing a card payment instrument along with
+        information about the card.
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              description: >
+                The ID of this request. If you can include these when querying
+                the outcome of individual requests, we can track down the root
+                cause faster.
+            token:
+              type: 'string'
+              description: Single-use token
+        - $ref: '#/components/schemas/ObfuscatedCard'
+    CardMetadata:
+      type: object
+      description: >
+        If a card payment instrument is used then BR-DGE may be able to provide
+        metadata about the card
+
+
+        **Please note: All text will be UPPERCASE and all fields can be null**
+      properties:
+        cardBrand:
+          type: 'string'
+          example: 'MASTERCARD'
+          description: 'MASTERCARD, VISA, etc'
+          nullable: true
+        issuer:
+          type: 'string'
+          description: 'Name of issuing bank'
+          nullable: true
+        type:
+          type: 'string'
+          enum:
+            - DEBIT
+            - CREDIT
+            - CHARGE_CARD
+          nullable: true
+        category:
+          type: 'string'
+          example: 'CLASSIC'
+          description: 'CLASSIC, BUSINESS, MIXED_PRODUCT, etc'
+          nullable: true
+        countryIsoA2:
+          type: string
+          description: 'ISO 3166 Alpha-2 Country code'
+          example: 'GB'
+          nullable: true
+        commercial:
+          type: boolean
+          description: 'Indicates if the card is corporate or retail'
+          example: true
+          nullable: true
+    CardholderData:
+      required:
+        - 'expiryDate'
+        - 'pan'
+        - 'type'
+      type: 'object'
+      description: 'Payment instrument that is a credit or debit card.'
+      properties:
+        type:
+          type: string
+          example: 'card'
+          enum:
+            - 'card'
+          description: 'Must be set to card'
+        customerId:
+          maxLength: 100
+          minLength: 1
+          pattern: "^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=`]*)$"
+          type: 'string'
+          description: Identifier for the merchant's customer who owns the
+            payment instrument to be tokenized.
+        nameOnCard:
+          maxLength: 255
+          minLength: 1
+          pattern: "^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=`]*)$"
+          type: 'string'
+          description:
+            'Name on the credit or debit card. This may be required by the
+            payment services provider (PSP).'
+          example: 'John F Doe'
+        pan:
+          type: 'string'
+          description: 'PAN of the credit or debit card.'
+          example: '4444 3333 2222 1111'
+        expiryDate:
+          type: 'string'
+          description: 'Expiry date of the credit or debit card.'
+          example: '01-99'
+        startDate:
+          type: 'string'
+          description: 'Start date of the credit or debit card.'
+          example: '01-00'
+        issueNumber:
+          maximum: 9
+          minimum: 1
+          type: 'integer'
+          description: 'Issue number of the credit or debit card.'
+          format: 'int32'
+          example: 1
+    CardholderDataWithOptionalCvv:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CardholderData'
+        - type: object
+          properties:
+            cv2:
+              pattern: '[0-9]*$'
+              type: 'string'
+              description: 'CV2 of the credit or debit card.'
+              example: '123'
+    TokenizedCardholderData:
+      required:
+        - 'token'
+        - 'type'
+      type: object
+      description:
+        Payment instrument consisting of a token that is a tokenized version of
+        another payment instrument
+      properties:
+        type:
+          type: string
+          description: 'Must be set to tokenized'
+          example: 'tokenized'
+          enum:
+            - 'tokenized'
+        token:
+          maxLength: 200
+          minLength: 1
+          pattern: "^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=`]*)$"
+          type: string
+          description: The token that represents a payment instrument.
+          example: 00000000-0000-0000-0000-000000000000
+        cv2:
+          maxLength: 4
+          minLength: 3
+          pattern: '[0-9]*$'
+          type: string
+          description: CV2 of the Tokenized payment instrument.
+          example: '000'
+    VisaInstallmentMatchedPlan:
+      type: object
+      description: >
+        Each Installment plan that has been matched against the eligibility
+        criteria setup by the plan's issuer. The input for the matching criteria is
+        provided by the Seller to Visa either during or after the purchase.
+      properties:
+        planId:
+          type: string
+          minLength: 36
+          maxLength: 36
+          description: Visa-generated identifier for an Installment plan.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Name of the installment plan. This may not be unique.
+        type:
+          type: string
+          enum:
+            - ISSUER_PROMOTION
+            - BILATERAL
+            - ISSUER_DEFAULT
+            - MARKET
+          description: >
+            - ISSUER_PROMOTION – Consumer-funded
+              * Applies a promotional rate as an Installment Funding Fee
+                applicable to the Consumer-Funded Installment Plan. An Issuer
+                Promotion Plan must have an explicit expiration date.
+              * These Installment Plans are available to all Merchant Participants
+                to display to Eligible Cardholders
+            - BILATERAL – Seller-funded or Consumer-funded
+              * Applies an Installment Funding Fee different from Market Rate
+                Installment Funding Fee.
+              * This Installment Funding Fee is agreed to between an Issuer and
+                a Merchant Participant pursuant to a written agreement between
+                the Merchant Participant and the Issuer These Installment Plans
+                are available only to specific Merchant Participants which have a
+                Bilateral Plan with the Issuer pursuant to an agreement with the
+                Issuer.
+            - ISSUER_DEFAULT – Consumer-funded
+              * Applies an Installment Funding Fee applicable to the Consumer-
+              Funded Plans.
+              * These Installment Plans are available to all Merchant Participants
+              to display to Eligible Cardholders.
+            - MARKET – Merchant Participant
+              * Applies a Market Rate Installment Plan
+              * These are standardized Seller Funded Installment Plans
+                recommended by Visa for defined tenures that Issuers may
+                choose to provide to Eligible Cardholders by opting into Market
+                Plans. The Installment Funding Fee payable by a Merchant
+                Participant to an Issuer for a Market Plan may vary by country
+                and may be revised at Visa’s discretion
+        numberOfInstallments:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: >
+            Maximum number of installments that can be in the Plan Acceptance
+            created from this plan.
+        installmentFrequency:
+          type: string
+          enum:
+            - WEEKLY
+            - BIWEEKLY
+            - MONTHLY
+            - BIMONTHLY
+          description: Supported Tenure Types for a plan.
+        termsAndConditions:
+          type: object
+          description: >
+            Terms and Conditions that need to be accepted by consumer before
+            the plan acceptance can be created using the Installment plan
+            corresponding to this terms and conditions. Plan terms and conditions
+            as setup by Issuers in Plan configuration. There may be one terms and
+            conditions per language. If there is only one setup, then there will be
+            only one item in the array.
+          properties:
+            url:
+              type: string
+              maxLength: 1000
+              description: >
+                A Terms and Conditions HTTPS URL hosted by the Issuer for displaying
+                to the cardholder for acceptance when initiating a plan acceptance for
+                this plan. This HTTPS URL must not invoke an executable script and
+                must point to an HTML page containing terms and conditions text in a
+                displayable manner. When provided during onboarding, the URL is
+                checked for validity.
+            version:
+              type: integer
+              minimum: 1
+              maximum: 2147483647
+              description: >
+                Installment Plan Terms and Conditions Version. Version of the Terms &
+                Conditions accepted by the consumer. The version is auto-incremented
+                every time an update is made to the Plan by the issuer.
+            text:
+              type: string
+              minLength: 1
+              maxLength: 2000
+              description: Text of the Terms and Conditions for Installment Plan.
+            languageCode:
+              type: string
+              minLength: 3
+              maxLength: 3
+              description: >
+                ISO 639-2 language code for the Terms and Conditions text. See
+                <https://www.loc.gov/standards/iso639-2/php/code_list.php> for more
+                information.
+        promotionInfo:
+          type: object
+          description: Promotion information shared between the Issuer and Seller.
+          properties:
+            promotionCode:
+              type: string
+              minLength: 1
+              maxLength: 2
+              description: >
+                An opaque string (as an external identifier to this plan) provided by the
+                issuer to Visa that identifies this Installment plan.
+
+                - Up to 2 alphanumeric characters
+
+                - It is typically shared to the Seller by the Financial Institution/Issuer
+                so that it can be passed-in during eligibility checks or plan
+                acceptance.
+            promotionID:
+              type: string
+              minLength: 1
+              maxLength: 8
+              description: >
+                An opaque string (as an external identifier) provided by the issuer to
+                Visa that identifies a program or promotion that is setup outside of
+                Visa Installment Services.
+
+                - Up to 8 alphanumeric characters
+
+                - This identifier is used during plan search or eligibility checks.
+            costInfo:
+              type: object
+              description: A list of applicable seller costs/fees for the Installment plan.
+              properties:
+                annualPercentageRate:
+                  type: integer
+                  minimum: 0
+                  maximum: 10000
+                  description: >
+                    Annual Percentage Rate (APR) as configured by the Issuer during plan
+                    creation. This is not used for calculations, but used only for display
+                    purposes.
+
+                    - Interest fee rate in percentage applied on Installment payment.
+
+                    - Percentage rate and is a non-negative value.
+
+                    - The percentage value is represented with two implicit decimals.
+                    (max 10000) Example: 320 specifies 3.2%
+
+                    - For your calculations, the actual percentage value should be
+                    interpreted as follows: `actualPercentageValue =
+                    ratePercentage / 100.00`
+                feeInfo:
+                  type: object
+                  description: Fee rate table used to calculate the Seller fees.
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - CONSUMER
+                        - CONSUMER_UPFRONT
+                      description: Fee types applicable for seller.
+                    ratePercentage:
+                        type: integer
+                        minimum: 0
+                        maximum: 10000
+                        description: >
+                          Interest fee rate in percentage applied on Installment payment.
+
+                          - Percentage rate and is a non-negative value.
+                          - The percentage value is represented with two implicit decimals.
+                            (max 10000) Example: 250 specifies 2.5%
+                          - For calculations, the actual percentage value should be interpreted
+                          as follows: `actualPercentageValue = ratePercentage /
+                          100.00`
+                    flatFee:
+                      type: integer
+                      description: >
+
+                        - All Amount fields use a representation in minor units only. For
+                        example, in Cents for USD currency
+
+                        - There are no fractional minor units; they are rounded to a whole
+                        number of minor units
+
+                        - The currency field contains the number of minor units (per ISO
+                        4217). For example, “123112” in USD represents the amount, USD
+                        1231.12.
+                totalPlanCost:
+                  type: integer
+                  description: >
+
+                    - All Amount fields use a representation in minor units only. For
+                    example, in Cents for USD currency
+
+                    - There are no fractional minor units; they are rounded to a whole
+                    number of minor units
+
+                    - The currency field contains the number of minor units (per ISO
+                    4217). For example, “123112” in USD represents the amount, USD
+                    1231.12.
+                totalFees:
+                  type: integer
+                  description: >
+                    - All Amount fields use a representation in minor units only. For
+                      example, in Cents for USD currency
+                    - There are no fractional minor units; they are rounded to a whole
+                    number of minor units
+                    - The currency field contains the number of minor units (per ISO
+                      4217). For example, “123112” in USD represents the amount, USD
+                      1231.12.
+                totalUpfrontFees:
+                  type: integer
+                  description: >
+                    - All Amount fields use a representation in minor units only. For
+                      example, in Cents for USD currency
+
+                    - There are no fractional minor units; they are rounded to a whole
+                      number of minor units
+
+                    - The currency field contains the number of minor units (per ISO
+                      4217). For example, “123112” in USD represents the amount, USD
+                      1231.12.
+                totalRecurringFees:
+                  type: integer
+                  description: >
+                    - All Amount fields use a representation in minor units only. For
+                      example, in Cents for USD currency
+
+                    - There are no fractional minor units; they are rounded to a whole
+                      number of minor units
+
+                    - The currency field contains the number of minor units (per ISO
+                      4217). For example, “123112” in USD represents the amount, USD
+                      1231.12.
+                firstInstallment:
+                  type: object
+                  description: Cost details (fee and principal) for the first Installment.
+                  properties:
+                    installmentFee:
+                      type: integer
+                      description: >
+                        - All Amount fields use a representation in minor units only. For
+                        example, in Cents for USD currency
+
+                        - There are no fractional minor units; they are rounded to a whole
+                        number of minor units
+
+                        - The currency field contains the number of minor units (per ISO
+                        4217). For example, “123112” in USD represents the amount, USD
+                        1231.12.
+                    amount:
+                      type: integer
+                      description: >
+                        - All Amount fields use a representation in minor units only. For
+                          example, in Cents for USD currency
+
+                        - There are no fractional minor units; they are rounded to a whole
+                          number of minor units
+
+                        - The currency field contains the number of minor units (per ISO
+                          4217). For example, “123112” in USD represents the amount, USD
+                          1231.12.
+                    upfrontFee:
+                      type: integer
+                      description: >
+                        The consumer upfront fee for this Installment plan and is included only
+                        on the first installment.
+
+                        - This fee corresponds to the fee type, CONSUMER_UPFRONT
+
+                        - Conditionality - This is available only on the first Installment.
+
+
+                        The amount is represented in minor units. It is a numerical value in the
+                        minor units of the currency, such as Cents for USD. If the currency is
+                        USD, “13400” is used for representing the amount, "$134.00". Note
+                        that there are no fractional minor units represented. They're rounded
+                        to the whole minor units.
+                lastInstallment:
+                  type: object
+                  description: Cost details (fee and principal) for the last Installment.
+                  properties:
+                    installmentFee:
+                      type: integer
+                      description: >
+                        - All Amount fields use a representation in minor units only. For
+                        example, in Cents for USD currency
+
+                        - There are no fractional minor units; they are rounded to a whole
+                        number of minor units
+
+                        - The currency field contains the number of minor units (per ISO
+                        4217). For example, “123112” in USD represents the amount, USD
+                        1231.12.
+                    amount:
+                      type: integer
+                      description: >
+                        - All Amount fields use a representation in minor units only. For
+                          example, in Cents for USD currency
+
+                        - There are no fractional minor units; they are rounded to a whole
+                          number of minor units
+
+                        - The currency field contains the number of minor units (per ISO
+                          4217). For example, “123112” in USD represents the amount, USD
+                          1231.12.
+      example:
+        vPlanID: 3fa...a6
+        name: Plan name
+        type: ISSUER_PROMOTION
+        numberOfInstallments: 0
+        installmentFrequency: WEEKLY
+        termsAndConditions:
+        - url: https://dev...sa.com/support
+          version: 0
+          text: Sample terms and conditions text
+          languageCode: eng
+        promotionInfo:
+          promotionCode: A2
+          promotionID: MBANK12
+        costInfo:
+          annualPercentageRate: 320
+          feeInfo:
+          - type: CONSUMER
+            ratePercentage: 150
+            flatFee: 1000
+          - type: UPFRONT_FEES
+            ratePercentage: 150
+          totalPlanCost: 61299
+          totalFees: 500
+          totalUpfrontFees: 100
+          totalRecurringFees: 20
+          firstInstallment:
+            installmentFee: 123112
+            amount: 123112
+            upfrontFee: 123112
+          lastInstallment:
+            installmentFee: 123112
+            amount: 123112
+          currency: USD
+    CaptureRequest:
+      required:
+      - "amount"
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: >
+            Amount to be captured on a payment that has been previously authorized, but not settled.
+            In the lowest denomination of the currency of the payment.
+          example: 1599
+    Order:
+      type: object
+      required:
+      - amount
+      - currencyCode
+      - customerEmail
+      - customerFirstName
+      - customerOrderCode
+      - orderDescription
+      - returnUrl
+      properties:
+        allowedPaymentInstruments:
+          type: array
+          example: [applePay, card]
+          description: >
+            By default, the BR-DGE Hosted Payment Page will attempt to offer
+            all possible payment methods based on a range of criteria
+            including:
+
+            - The payment methods that are enabled on your retail channels.
+
+            - The availability of PSPs connected to your retail channel, and the payment
+              methods they support.
+
+            - The payment methods that are supported by your customers' web browser.
+
+            As it is sometimes useful to limit the available payment methods on
+            a per-order basis, you have the option to specify a set of allowed
+            payment methods when creating an order via `POST v1/orders`. This
+            will result in only the payment methods specified in the set being
+            offered to your customer as part of the order.
+
+
+            Possible values:
+
+            - `card`
+
+            - `applePay`
+
+            - `googlePay`
+
+            - `payPal`
+
+            - `visaInstalments` please note that you should also enable `card`
+              if you wish to enable Visa Installments.
+          items:
+            $ref: '#/components/schemas/OrderPaymentInstrumentType'
+        amount:
+          type: integer
+          format: int64
+          example: 1000
+          description: >
+            Value of the order specified in the lowest denomination of the
+            given currency. The final amount charged to the shopper may increase
+            depending on any configured surcharge rules.
+        billingAddress:
+          description: >
+            You can provide an optional default billing address that will be
+            pre-populated in resulting BR-DGE Hosted Payment Pages to save your
+            shopper from having to fill it in. They will have the option to
+            change the billing address if required.
+          allOf:
+          - $ref: "#/components/schemas/Address"
+        cardOnFileTermsAndConditionsUrl:
+          type: string
+          example: "http://example.com/terms"
+          description: >
+            Link to terms and conditions relating to saving card details.
+
+            If `cardOnFileTermsAndConditionsUrl` is specified and `customerAgreedToSaveCard``
+            is set to true then a message will be displayed to your customer notifying them
+            that their card details will be saved according to the linked terms and conditions.
+
+            If `cardOnFileTermsAndConditionsUrl` is specified and `customerAgreedToSaveCard`
+            is not specified or set to false then your customer will be given the opportunity
+            to agree to the linked terms and conditions and have their card details saved.
+          pattern: "((https?)://)(www.)?[a-zA-Z0-9\\-@:%._\\+~#?&//=]{2,256}\\b([-a-zA-Z0-9@:%._\\+~#?&//=]*)"
+        corporateCardPercentageSurcharge:
+          type: number
+          format: double
+          example: 12.5
+          description: >
+            If provided then when BR-DGE detects a shopper using a corporate
+            card we will automatically apply a surcharge to the base amount for the
+            order. Your customer will be notified of any surcharges and given
+            the option to use an alternative payment method.
+        currencyCode:
+          type: string
+          example: GBP
+          description: 'Currency code of the order (ISO 4217)'
+        customerAgreedToSaveCard:
+          type: boolean
+          default: false
+          description: >
+            If [Credentials On File Mandate requirements](https://secure.comcarde.com/docs/vault#credentials-on-file-mandate-compliance)
+            relating to cardholder consent has been met prior to creating an order
+            you can set this flag to ensure that the Hosted Payment Page always
+            creates a BR-DGE Card on File if your customer enters card details.
+
+
+            Please note that if you set this to true then you also need to provide
+            a link to the agreement via the `cardOnFileTermsAndConditionsUrl` field.
+        customerEmail:
+          type: string
+          example: 'a@b.com'
+          description: 'Email address of the customer'
+          minLength: 1
+          maxLength: 254
+          pattern: "^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+        customerFirstName:
+          type: string
+          example: John
+          description: >
+            First name of the customer (customerFirstName length plus customerLastName
+            length must be less than 255 characters long)
+          minLength: 1
+          maxLength: 255
+          pattern: "^([\\p{L}\\p{M}\\-'. ]*)$"
+        customerId:
+          type: string
+          example: john@doe.com
+          minLength: 1
+          maxLength: 100
+          pattern: "^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=\\r\\n]*)$"
+          description: >
+            Associate order with a customer identifier. Any pre-existing BR-DGE Card on
+            Files for the customer will automatically be presented as payment
+            methods and any new BR-DGE Cards on File will be associated with the customer.
+        customerLastName:
+          type: string
+          example: Smith
+          description: >
+            Last name of the customer (customerFirstName length plus customerLastName
+            length must be less than 255 characters long)
+          minLength: 0
+          maxLength: 255
+          pattern: "^([\\p{L}\\p{M}\\-'. ]*)$"
+        customerOrderCode:
+          type: string
+          example: ABC123
+          description: >
+            You may provide your own order code to be used in payments
+            This is separate from the BR-DGE order.
+          minLength: 1
+          maxLength: 50
+          pattern: "^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=\\r\\n]*)$"
+        customerPhoneNumber:
+          type: string
+          example: "+44 123 1110000"
+          description: Telephone number of the customer
+          minLength: 0
+          maxLength: 255
+          pattern: "^$|^[+]?[(0-9][0-9 ()-]*[0-9]$"
+        deliveryAddress:
+          "$ref": "#/components/schemas/Address"
+        intent:
+          type: string
+          default: capture
+          description: >
+            By default payments are captured immediately, but you can
+            you can choose to split the authorization and the capture of the payment.
+             * `authorize` - if you intend to capture separately using
+               `POST /v1/payments/{paymentId}/capture`
+             * `capture` - If you intend to capture immediately
+          enum:
+          - "authorize"
+          - "capture"
+        merchantInitiated:
+          type: string
+          description: >
+            Only set this field if you are using the Hosted Payment Page to
+            perform an initial Merchant Initiated Transaction (MIT).
+
+
+            For more information see [here].
+
+
+            Possible values:
+
+            - `unscheduled` An unscheduled charge for a service such as e-scooter hire
+
+            - `recurring` A recurring payment for a magazine subscription
+
+
+            [here]: https://secure.comcarde.com/docs/vault#making-merchant-initiated-transactions-mits-using-card-on-file
+          enum:
+          - unscheduled
+          - recurring
+        orderDescription:
+          type: string
+          example: Taxi fare
+          description: Description of what the order is for
+          minLength: 1
+          maxLength: 255
+          pattern: "^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=\\r\\n]*)$"
+        returnUrl:
+          type: string
+          example: http://www.return.url
+          description: Return URL for confirmed order
+          pattern: "((http|https)://)(www.)?[a-zA-Z0-9\\-@:%._\\+~#?&//=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%._\\+~#?&//=]*)"
+        threeDSecureOptions:
+          $ref: '#/components/schemas/ThreeDSecureOptions'
+        threeDSecureRequired:
+          type: boolean
+          description: >
+            You can indicate that 3D Secure processing is preferred, usually
+            initializing a 3D Secure authentication flow.
+
+
+            Note that setting this as true does not guarantee that the payment
+            will end up with successful 3D Secure authentication. Also, setting
+            this to false does not guarantee that 3D Secure authentication will
+            not be applied to the payment, as some PSPs may choose to apply their
+            own rules around this regardless need to opt-in to 3D Secure
+            authentication on a per-payment basis.
+          example: true
+        tokens:
+          type: string
+          example: "token1,token2"
+          minLength: 1
+          maxLength: 200
+          pattern: "^([\\p{L}\\p{M} 0-9'\\[\\]()@?!\\-/.,_&*:;+=\\r\\n]*)$"
+          description: >
+            A comma-delimited set of BR-DGE Card on File multi-use tokens to be
+            offered as payment methods for the order.
+      title: Order
+      description: Class representing an order tracked by the application.
+    OrderResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: 1000
+          description: A unique identifier covering the outcome of the request
+        id:
+          type: string
+          example: aaaaaaaaaaaaaaaa
+          description: The ID of this request
+        message:
+          type: string
+          description: A description of the outcome of the request
+        orderId:
+          type: string
+          description: The ID of this order
+        redirectUrl:
+          type: string
+          description: >
+            The URL to redirect your customer to in progress the order
+        validationErrors:
+          type: object
+          description: An object that contains validation errors
+          additionalProperties:
+            type: string
+      title: OrderResponse
+    OrderStatusResponse:
+      title: OrderStatusResponse
+      description: Last known status of an Order
+      type: object
+      properties:
+        code:
+          type: string
+          example: 1000
+          description: 'A unique identifier covering the outcome of the request.'
+        message:
+          type: string
+          description: 'A description of the outcome of the request.'
+        creationTimestamp:
+          type: string
+          format: date-time
+          description: 'Creation date'
+          example: '2022-01-30T10:10:10Z'
+        cardOnFileTokenCreated:
+          type: 'string'
+          description: >
+            If a Card on File was created as part of this order, then this field will
+            be populated with the multi-use token for the Card on File.
+        payments:
+          type: array
+          description: >
+            A list of up to three payment attempts in descending time order
+          items:
+            type: object
+            description: >
+              Details of an individual payment attempt.
+            properties:
+              paymentId:
+                type: string
+                description: 'Unique identifer for the payment'
+                example: 'db805559-7cc4-4866-9e52-0b60fa59f12b'
+              code:
+                type: string
+                example: 1000
+                description: 'A unique identifier covering the outcome of the request.'
+              message:
+                type: string
+                description: 'A description of the outcome of the request.'
+                example: 'Transaction Error: Withdrawal limit exceeded'
+              timestamp:
+                type: string
+                format: date-time
+                description: 'Timestamp for when the payment attempt was made'
+                example: "2022-01-30T10:10:10Z"
+              paymentInstrument:
+                oneOf:
+                - $ref: '#/components/schemas/OrderPaymentInstrumentCard'
+                - $ref: '#/components/schemas/OrderPaymentInstrumentApplePay'
+                - $ref: '#/components/schemas/OrderPaymentInstrumentGooglePay'
+                - $ref: '#/components/schemas/OrderPaymentInstrumentPayPal'
+                discriminator:
+                  propertyName: type
+                  description: >
+                    To help API consumers detect the object type, we have
+                    provided the `type` property which can be used as a
+                    discriminator to detect what type of payment instrument
+                    was used.
+                  mapping:
+                    card: '#/components/schemas/OrderPaymentInstrumentCard'
+                    applePay: '#/components/schemas/OrderPaymentInstrumentApplePay'
+                    googlePay: '#/components/schemas/OrderPaymentInstrumentGooglePay'
+                    payPal: '#/components/schemas/OrderPaymentInstrumentPayPal'
+              psp:
+                $ref: '#/components/schemas/PspInfo'
+    OrderPaymentInstrument:
+      type: object
+      description: >
+        All Order Payment Instruments will have a type field specifying
+        the Payment Instrument used using one of the values of the
+        OrderPaymentInstrumentType enum.
+      required:
+      - type
+      properties:
+        type:
+          type: string
+    OrderPaymentInstrumentType:
+      type: string
+      enum:
+      - card
+      - applePay
+      - googlePay
+      - payPal
+      - visaInstalments
+      example: 'card'
+    OrderPaymentInstrumentCard:
+      description: >
+        If a card was used as a payment instrument in a payment then the type
+        field will be `card` and you will also be provided with information
+        about the card used.
+      allOf:
+        - $ref: '#/components/schemas/OrderPaymentInstrument'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - card
+            nameOnCard:
+              type: string
+              example: 'John F Doe'
+            pan:
+              type: string
+              example: '1234 56** **** 1111'
+            expiryDate:
+              type: string
+              example: '06-30'
+            cardMetadata:
+              $ref: '#/components/schemas/CardMetadata'
+    OrderPaymentInstrumentApplePay:
+      description: >
+        If Apple Pay was used as a payment instrument in a payment then the type
+        field will be `applePay`.
+      allOf:
+        - $ref: '#/components/schemas/OrderPaymentInstrument'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: Always set to `applePay`
+    OrderPaymentInstrumentGooglePay:
+      description: >
+        If Google Pay was used as a payment instrument in a payment then the type
+        field will be `googlePay`.
+      allOf:
+        - $ref: '#/components/schemas/OrderPaymentInstrument'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: Always set to `googlePay`
+    OrderPaymentInstrumentPayPal:
+      description: >
+        If PayPal was used as a payment instrument in a payment then the type
+        field will be `payPal`.
+      allOf:
+        - $ref: '#/components/schemas/OrderPaymentInstrument'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: Always set to `payPal`
+    TransactionStatusBase:
+      type: object
+      required:
+        - paymentId
+        - code
+        - message
+        - psp
+        - timestamp
+      properties:
+        paymentId:
+            type: string
+            description: Unique identifier for the payment
+            example: 2c6a34be-f7a1-4b49-b09c-e84e1322df7f
+        code:
+          type: string
+          description: >-
+            [Response Code](https://secure.comcarde.com/docs/rest-api/response-codes)
+            signifying the outcome of the request
+          example: '1000'
+        message:
+          type: string
+          description: A description of the outcome
+        psp:
+          $ref: '#/components/schemas/PspInfo'
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the transaction entered its latest status.
+          example: "2022-01-30T10:10:10Z"
+    PaymentStatusPaymentInstrumentCard:
+      title: Card
+      description: >
+        If a card was used as a payment instrument in a payment then the type
+        field will be `card` and you will also be provided with information
+        about the card used. Please note: card details may not always be available, in which case
+        only the type field will be returned.
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          description: Always `card`
+        nameOnCard:
+          type: string
+          example: 'John F Doe'
+        pan:
+          type: string
+          example: '1234 56** **** 1111'
+        expiryDate:
+          type: string
+          example: '06-30'
+        cardMetadata:
+          $ref: '#/components/schemas/CardMetadata'
+    PaymentStatusPaymentInstrumentApplePay:
+      title: ApplePay
+      description: >
+        If Apple Pay was used as a payment instrument in a payment then the type
+        field will be `applePay`.
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          description: Always set to `applePay`.
+    PaymentStatusPaymentInstrumentGooglePay:
+      title: GooglePay
+      description: >
+        If Google Pay was used as a payment instrument in a payment then the type
+        field will be `googlePay`.
+      type: object
+      properties:
+        type:
+          type: string
+          description: Always set to `googlePay`.
+    PaymentStatusPaymentInstrumentPayPal:
+      title: PayPal
+      description: >
+        If PayPal was used as a payment instrument in a payment then the type
+        field will be `payPal`.
+      type: object
+      properties:
+        type:
+          type: string
+          description: Always set to `payPal`.
+    PaymentStatusPaymentInstrumentIdeal:
+      title: iDEAL
+      description: >
+        If iDEAL was used as a payment instrument in a payment then the type
+        field will be `ideal`.
+      type: object
+      properties:
+        type:
+          type: string
+          description: Always set to `ideal`.
+    PaymentStatusPaymentInstrumentBancontact:
+      title: Bancontact
+      description: >
+        If Bancontact was used as a payment instrument in a payment then the type
+        field will be `bancontact`.
+      type: object
+      properties:
+        type:
+          type: string
+          description: Always set to `bancontact`.
+  securitySchemes:
+    'ServerApiKey':
+      type: http
+      scheme: bearer
+      description: >
+        **IMPORTANT** This key allows you to perform sensitive operations such
+        as authorizing payments and refunds.
+
+
+        **Production Server API keys must not be accessible outside your organization.**
+    'ClientApiKey':
+      type: http
+      scheme: bearer
+      description: >
+        Separate Client API Keys will be provided for use in client
+        applications to support certain features that need to happen
+        in untrusted client environments.
+
+
+        Client API keys provide restricted permissions to ensure they cannot be
+        misused.
+  examples:
+    authorization-pending:
+      summary: Payment Authorization Pending
+      description: A transaction has been submitted for Authorization to the
+        Processor and this request has been accepted by the Processor but the
+        outcome has not been determined.
+      value:
+        type: payment
+        id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+        merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+        code: '1000'
+        message: Approved
+        status: AUTHORIZATION_PENDING
+        psp:
+          name: Barclaycard Smartpay Fuse
+          transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+          message: "{\"example\": \"psp-response\"}"
+        hashCode: 90c3b3881074021383c8679f0232580f7b96cebacab77517fc4b479e6d977b06
+    authorized:
+      summary: Payment Authorized
+      description: A transaction has been submitted for Authorization to the
+        Processor and this request has been processed and Authorized. The
+        transaction is now available to be included in a Capture request. Where
+        the merchant is enrolled for auto capture with the Processor, the
+        transaction status will be set directly to `CAPTURED`
+      value:
+        type: payment
+        id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+        merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+        code: '1000'
+        message: Approved
+        status: AUTHORIZED
+        psp:
+          name: Barclaycard Smartpay Fuse
+          transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+          message: "{\"example\": \"psp-response\"}"
+        hashCode: 90c3b3881074021383c8679f0232580f7b96cebacab77517fc4b479e6d977b06
+    capture-pending:
+      summary: Payment Capture Pending
+      description: An Authorized transaction has been submitted for capture and
+        this request has been accepted by the Processor but the outcome has not
+        been determined.
+      value:
+        type: payment
+        id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+        merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+        code: '1002'
+        message: Authorization was approved but capture
+          outcome is pending.
+        status: CAPTURE_PENDING
+        psp:
+          name: Barclaycard Smartpay Fuse
+          transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+          message: "{\"example\": \"psp-response\"}"
+        hashCode: 90c3b3881074021383c8679f0232580f7b96cebacab77517fc4b479e6d977b06
+    captured:
+      summary: Payment Captured
+      description: An Authorized transaction has been submitted for capture and
+        this request has been accepted and confirmed by the Processor.
+      value:
+        type: payment
+        id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+        merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+        code: '1000'
+        message: Approved
+        status: CAPTURED
+        psp:
+          name: Barclaycard Smartpay Fuse
+          transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+          message: "{\"example\": \"psp-response\"}"
+        hashCode: 90c3b3881074021383c8679f0232580f7b96cebacab77517fc4b479e6d977b06
+    declined:
+      summary: Payment Declined
+      description: A transaction has been submitted for Authorization to the
+        Processor and this request has been processed and declined. The
+        transaction could have been declined by the Processor due to rules
+        within their system [Fraud, velocity limits, value limits] or by the
+        Card Issuer. There will be an associated “reason” assigned to this
+        state providing details of the decline.
+      value:
+        type: payment
+        id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+        merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+        code: '4202'
+        message: 'Transaction Error: Insufficient funds.'
+        status: DECLINED
+        psp:
+          name: Barclaycard Smartpay Fuse
+          transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+          message: "{\"example\": \"psp-response\"}"
+        hashCode: 90c3b3881074021383c8679f0232580f7b96cebacab77517fc4b479e6d977b06
+    rejected:
+      summary: Payment Rejected
+      description: A transaction has been submitted for Authorization to the
+        processor and this been rejected due to a validation or a technical
+        error. This rejection may have occurred within the BR-DGE platform, the
+        Processor or the Card Issuer. There will be an associated “reason”
+        assigned to this state providing details of the rejection.
+      value:
+        type: payment
+        id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+        merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+        code: '4104'
+        message: 'Merchant Account Error: Set up error'
+        status: REJECTED
+        psp:
+          name: Barclaycard Smartpay Fuse
+          transactionId: a83a53a2-dcc8-45be-bf70-2b1e4b719f7c
+          message: "{\"example\": \"psp-response\"}"
+        hashCode: 90c3b3881074021383c8679f0232580f7b96cebacab77517fc4b479e6d977b06
+    capture-failed:
+      summary: Payment Capture Failed
+      description: A transaction has been submitted for Authorization to the
+        Processor and this request has been processed and failed. There will be
+        an associated “reason” assigned to this state providing details of the
+        failure.
+      value:
+        type: payment
+        id: c2fcf424-d7df-4b8b-aa98-3a60ce990d7c
+        merchantAccountId: aadf8010-4df3-49c6-96c0-9f175f60ef36
+        code: '4252'
+        message: 'Transaction Error: Maximum number of attempts to process
+          request reached'
+        status: CAPTURE_FAILED
+        psp:
+          name: Checkout.com
+          transactionId: 'a83a53a2-dcc8-45be-bf70-2b1e4b719f7c'
+          message: "{\"error\": \"Transaction Error: Maximum number of attempts to process request reached\"}"
+        hashCode: 90c3b3881074021383c8679f0232580f7b96cebacab77517fc4b479e6d977b06
+    entity-not-found:
+      summary: Entity Not Found Error
+      description: >
+        This example shows the [4040 error code].
+
+
+        This occurs when an entity was not found for a given ID, the entity should be clear from context.
+
+
+        A full list of possible response codes is available [here].
+
+
+        [4040 error code]: https://secure.comcarde.com/docs/rest-api/response-codes#4040
+
+        [here]: https://secure.comcarde.com/docs/rest-api/response-codes
+      value:
+        code: 4040
+        message: Entity not found
+        id: 4fad8e2e06a15656
