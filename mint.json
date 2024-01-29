@@ -76,6 +76,12 @@
       ]
     },
     {
+      "group": "Payments",
+      "pages": [
+        "payments/request-a-transfer-of-funds-between-accounts-at-banks-or-other-financial-institutions"
+      ]
+    },
+    {
       "group": "Endpoint Examples",
       "pages": [
         "api-reference/endpoint/get",
